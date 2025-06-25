@@ -8,7 +8,14 @@ const UserSchema = new mongoose.Schema({
     type: String,
     enum: ["user", "admin"],
     default: "user"
-  }
+  },
+  solvedProblems: [{ type: mongoose.Schema.Types.ObjectId, ref: "Problem" }],
+  favoriteProblems: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Problem",
+  },
+],
 });
 
 module.exports = mongoose.model("User", UserSchema);

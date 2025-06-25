@@ -3,6 +3,24 @@ const router = express.Router();
 const Problem = require("../models/Problem");
 const verifyAdmin = require("../middleware/verifyAdmin");
 
+const User = require("../models/User");
+// Admin stats route
+router.get("/stats", verifyAdmin, async (req, res) => {
+  try {
+    const users = await User.countDocuments();
+    const problems = await Problem.countDocuments();
+
+    // Simulated active users — update logic if you track active sessions
+    const active = await User.countDocuments({}); // Replace with real logic if needed
+
+    res.json({ users, problems, active });
+  } catch (err) {
+    console.error("Stats fetch failed:", err);
+    res.status(500).json({ message: "Failed to fetch stats" });
+  }
+});
+
+
 // GET all problems (summary)
 router.get("/problems", verifyAdmin, async (req, res) => {
   const problems = await Problem.find().select("title difficulty");

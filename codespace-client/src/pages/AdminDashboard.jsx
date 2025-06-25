@@ -8,16 +8,17 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
 
   const fetchStats = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/admin/stats", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setStats(res.data);
-    } catch (err) {
-      console.error("Stats fetch error:", err);
-    }
-  };
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.get("http://localhost:5000/api/admin/stats", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setStats(res.data);
+  } catch (err) {
+    console.error("Stats fetch error:", err);
+  }
+};
+
 
   const fetchProblems = async () => {
     try {
@@ -107,6 +108,13 @@ export default function AdminDashboard() {
             ))}
           </tbody>
         </table>
+        <button
+  onClick={() => navigate("/admin/add-problem")}
+  className=" mt-10 mb-4 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded"
+>
+  ➕ Add New Problem
+</button>
+
       </div>
     </div>
   );

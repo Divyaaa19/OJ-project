@@ -1,1 +1,11 @@
 @import "tailwindcss";
+body {
+  font-family: 'Inter', sans-serif;
+}
+pre, code {
+  font-family: 'Fira Code', monospace;
+}
+html, body {
+  background-color: #000; /* full black background */
+  color: white;
+}
