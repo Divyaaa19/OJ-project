@@ -63,6 +63,13 @@ export default function ProblemDetail() {
               <p className="text-gray-300">✅ <strong>Expected Output:</strong></p>
               <pre className="bg-gray-800 p-3 rounded text-green-300 font-mono whitespace-pre-wrap">{tc.output}</pre>
             </div>
+            {tc.explanation && (
+  <div className="mt-2">
+    <p className="text-gray-300">🧠 <strong>Explanation:</strong></p>
+    <pre className="bg-gray-800 p-3 rounded text-gray-200 font-mono whitespace-pre-wrap">{tc.explanation}</pre>
+  </div>
+)}
+
           </div>
         ))}
       </section>

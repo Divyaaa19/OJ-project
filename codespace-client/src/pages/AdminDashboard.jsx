@@ -20,6 +20,11 @@ export default function AdminDashboard() {
 };
 
 
+const handleLogout = () => {
+  localStorage.removeItem("token"); // clear token
+  navigate("/"); // redirect to home
+};
+
   const fetchProblems = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -50,8 +55,17 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 space-y-6">
-      <h1 className="text-4xl font-bold text-center text-blue-400">🛠️ Admin Dashboard</h1>
+    <div className="min-h-screen bg-black text-white p-10 space-y-6">
+      <div className="flex justify-between items-center mb-6">
+  <h1 className="text-5xl p-5 font-bold text-blue-400">🛠️ Admin Dashboard</h1>
+  <button
+    onClick={handleLogout}
+    className="flex items-center gap-2 text-gray-300 hover:text-white px-3 py-1 rounded transition text-xl"
+  >
+    ⏻ Logout
+  </button>
+</div>
+
       
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

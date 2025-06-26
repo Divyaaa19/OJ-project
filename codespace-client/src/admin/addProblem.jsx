@@ -9,7 +9,7 @@ export default function AddProblem() {
     description: "",
     constraints: "",
     difficulty: "Easy",
-    testCases: [{ input: "", output: "" }]
+    testCases: [{ input: "", output: "",explanation: "" }]
   });
 
   const handleChange = (e) => {
@@ -23,7 +23,7 @@ export default function AddProblem() {
   };
 
   const addTestCase = () => {
-    setProblem({ ...problem, testCases: [...problem.testCases, { input: "", output: "" }] });
+    setProblem({ ...problem, testCases: [...problem.testCases, { input: "", output: "", explanation: ""}] });
   };
 
   const removeTestCase = (index) => {
@@ -32,20 +32,32 @@ export default function AddProblem() {
     setProblem({ ...problem, testCases: updated });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem("token");
-      await axios.post("http://localhost:5000/api/admin/problems", problem, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert("Problem added successfully!");
-      navigate("/admin-dashboard"); // 👈 back to dashboard
-    } catch (err) {
-      alert("Failed to add problem.");
-      console.error(err);
-    }
-  };
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const token = localStorage.getItem("token");
+
+    const cleanedProblem = {
+      ...problem,
+      testCases: problem.testCases.map(({ input, output, explanation }) => {
+        const tc = { input, output };
+        if (explanation?.trim()) tc.explanation = explanation;
+        return tc;
+      }),
+    };
+
+    await axios.post("http://localhost:5000/api/admin/problems", cleanedProblem, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    alert("Problem added successfully!");
+    navigate("/admin-dashboard");
+  } catch (err) {
+    alert("Failed to add problem.");
+    console.error(err);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
@@ -100,6 +112,13 @@ export default function AddProblem() {
               placeholder="Expected Output"
               className="w-full p-2 bg-gray-800 border border-gray-600 rounded"
             />
+            <input
+  value={tc.explanation}
+  onChange={(e) => handleTestCaseChange(index, "explanation", e.target.value)}
+  placeholder="Explanation (optional)"
+  className="w-full p-2 bg-gray-800 border border-gray-600 rounded"
+/>
+
             {problem.testCases.length > 1 && (
               <button
                 type="button"

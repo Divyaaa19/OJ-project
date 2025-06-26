@@ -26,7 +26,7 @@ export default function Home() {
 
       <div className="container mx-auto px-6 py-16 flex flex-col items-center text-center">
         <motion.h1 
-          className="text-5xl md:text-6xl font-extrabold mb-4 mt-30"
+          className="text-5xl md:text-6xl font-extrabold mb-15 mt-30"
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 1 }}
@@ -35,7 +35,7 @@ export default function Home() {
         </motion.h1>
 
         <motion.p
-          className="text-lg md:text-xl text-gray-300 max-w-xl mb-8"
+          className="text-lg md:text-xl text-gray-300 max-w-xl mb-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1, duration: 1 }}

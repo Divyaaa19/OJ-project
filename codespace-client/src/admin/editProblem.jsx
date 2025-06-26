@@ -44,19 +44,31 @@ export default function EditProblem() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:5000/api/admin/problems/${id}`, problem, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      alert("Problem updated!");
-      navigate("/admin-dashboard");
-    } catch (err) {
-      alert("Update failed.");
-      console.error(err);
-    }
-  };
+  e.preventDefault();
+  try {
+    const token = localStorage.getItem("token");
+
+    const cleanedProblem = {
+      ...problem,
+      testCases: problem.testCases.map(({ input, output, explanation }) => {
+        const tc = { input, output };
+        if (explanation?.trim()) tc.explanation = explanation;
+        return tc;
+      }),
+    };
+
+    await axios.put(`http://localhost:5000/api/admin/problems/${id}`, cleanedProblem, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    alert("Problem updated!");
+    navigate("/admin-dashboard");
+  } catch (err) {
+    alert("Update failed.");
+    console.error(err);
+  }
+};
+
 
   if (!problem) return <div className="text-white p-4">Loading...</div>;
 
@@ -113,6 +125,13 @@ export default function EditProblem() {
               placeholder="Expected Output"
               className="w-full p-2 bg-gray-800 border border-gray-600 rounded"
             />
+            <input
+  value={tc.explanation || ""}
+  onChange={(e) => handleTestCaseChange(index, "explanation", e.target.value)}
+  placeholder="Explanation (optional)"
+  className="w-full p-2 bg-gray-800 border border-gray-600 rounded"
+/>
+
             {problem.testCases.length > 1 && (
               <button
                 type="button"

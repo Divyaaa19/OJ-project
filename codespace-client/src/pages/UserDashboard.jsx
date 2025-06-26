@@ -4,7 +4,6 @@ import axios from "axios";
 import { FaStar, FaRegStar } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-
 export default function UserDashboard() {
   const navigate = useNavigate();
 
@@ -13,6 +12,7 @@ export default function UserDashboard() {
   const [difficulty, setDifficulty] = useState("All");
   const [status, setStatus] = useState("All");
   const [activeTab, setActiveTab] = useState("Problems");
+  const [sidebarOpen, setSidebarOpen] = useState(true); // toggle state
 
   const token = localStorage.getItem("token");
 
@@ -47,10 +47,26 @@ export default function UserDashboard() {
   const solved = problems.filter(p => p.solved).length;
 
   return (
-    <div className="flex bg-black text-white min-h-screen">
-      <Sidebar solved={solved} total={total} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <div className="ml-64 w-full p-6">
-        <h1 className="text-4xl font-extrabold mb-8 text-center animate-pulse text-blue-400">
+    <div className="flex bg-black text-white min-h-screen relative">
+      {/* Toggle Sidebar Button */}
+      
+
+      {/* Sidebar */}
+      <div className={`transition-all duration-300 h-screen bg-gray-900 ${sidebarOpen ? "w-64" : "w-16"} fixed`}>
+        <Sidebar
+  solved={solved}
+  total={total}
+  activeTab={activeTab}
+  setActiveTab={setActiveTab}
+  collapsed={!sidebarOpen}
+  toggleCollapse={() => setSidebarOpen(prev => !prev)} // add this
+/>
+
+      </div>
+
+      {/* Main Content */}
+      <div className={`transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-16"} w-full p-10`}>
+        <h1 className="text-5xl font-extrabold mb-8 p-5 text-center animate-pulse text-blue-400">
           🚀 Welcome to CodeSpace
         </h1>
 
@@ -62,38 +78,37 @@ export default function UserDashboard() {
             onChange={e => setSearch(e.target.value)}
           />
           <div className="flex gap-6">
-  <div className="relative w-40">
-    <select
-      className="block appearance-none w-full bg-gray-800 text-white border border-gray-600 hover:border-gray-400 px-4 py-2 pr-8 rounded-md leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
-      value={difficulty}
-      onChange={(e) => setDifficulty(e.target.value)}
-    >
-      <option>All</option>
-      <option>Easy</option>
-      <option>Medium</option>
-      <option>Hard</option>
-    </select>
-    <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-white">
-      ▼
-    </div>
-  </div>
+            <div className="relative w-40">
+              <select
+                className="block appearance-none w-full bg-gray-800 text-white border border-gray-600 hover:border-gray-400 px-4 py-2 pr-8 rounded-md leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value)}
+              >
+                <option>All</option>
+                <option>Easy</option>
+                <option>Medium</option>
+                <option>Hard</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-white">
+                ▼
+              </div>
+            </div>
 
-  <div className="relative w-40">
-    <select
-      className="block appearance-none w-full bg-gray-800 text-white border border-gray-600 hover:border-gray-400 px-4 py-2 pr-8 rounded-md leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
-      value={status}
-      onChange={(e) => setStatus(e.target.value)}
-    >
-      <option>All</option>
-      <option>Solved</option>
-      <option>Unsolved</option>
-    </select>
-    <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-white">
-      ▼
-    </div>
-  </div>
-</div>
-
+            <div className="relative w-40">
+              <select
+                className="block appearance-none w-full bg-gray-800 text-white border border-gray-600 hover:border-gray-400 px-4 py-2 pr-8 rounded-md leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option>All</option>
+                <option>Solved</option>
+                <option>Unsolved</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-white">
+                ▼
+              </div>
+            </div>
+          </div>
         </div>
 
         <table className="w-full text-left">
@@ -111,11 +126,11 @@ export default function UserDashboard() {
               <tr key={p._id} className="border-b border-gray-800 hover:bg-gray-800">
                 <td className="p-2">{idx + 1}</td>
                 <td
-  className="p-2 text-blue-400 hover:underline cursor-pointer"
-  onClick={() => navigate(`/user-problems/${p._id}`)}
->
-  {p.title}
-</td>
+                  className="p-2 text-blue-400 hover:underline cursor-pointer"
+                  onClick={() => navigate(`/user-problems/${p._id}`)}
+                >
+                  {p.title}
+                </td>
                 <td className="p-2 capitalize text-yellow-400">{p.difficulty}</td>
                 <td className="p-2 text-green-400">{p.solved ? "✔" : "❌"}</td>
                 <td className="p-2">

@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
 
 const testCaseSchema = new mongoose.Schema({
-  input: String,
-  output: String,
-});
+  input: { type: String, required: true },
+  output: { type: String, required: true },
+  explanation: { type: String, required: false }, // optional
+}); // optional: prevents auto-adding _id to each test case
+
 
 const problemSchema = new mongoose.Schema({
   title: String,
