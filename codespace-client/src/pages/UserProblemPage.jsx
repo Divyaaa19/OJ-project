@@ -12,6 +12,14 @@ export default function ProblemPage() {
   const [problem, setProblem] = useState(null);
   const [code, setCode] = useState("// Write your code here");
   const [language, setLanguage] = useState("javascript"); // for future use
+  const [testCases, setTestCases] = useState([]); // initial from problem.testCases
+const [customCases, setCustomCases] = useState([]); // user-added cases
+const [currentInput, setCurrentInput] = useState('');
+const [outputs, setOutputs] = useState([]); // stores result for each case
+const [selectedCase, setSelectedCase] = useState(0);
+const allInputs = [...testCases, ...customCases];
+
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -30,9 +38,38 @@ export default function ProblemPage() {
       });
   }, [id]);
 
-  const runCode = () => {
-    alert("Running code...");
-  };
+  useEffect(() => {
+  if (problem?.testCases) {
+    setTestCases(problem.testCases.map(tc => tc.input));
+  }
+}, [problem]);
+
+ const runCode = async () => {
+  const allInputs = [...testCases, ...customCases];
+  const results = [];
+
+  for (const input of allInputs) {
+    try {
+      const res = await axios.post("http://localhost:8000/run", {
+        language,
+        code,
+        input,
+      });
+      results.push(res.data.output || "No output");
+    } catch (err) {
+      results.push("Error");
+    }
+  }
+
+  setOutputs(results);
+  // Reset selected tab if the deleted one was active
+  if (selectedCase >= allInputs.length) {
+    setSelectedCase(0);
+  }
+};
+
+
+
 
   const submitCode = () => {
     alert("Submitting code...");
@@ -44,8 +81,7 @@ export default function ProblemPage() {
     <div className="min-h-screen text-white bg-[#0f0f0f] p-6">
       <div className="flex gap-6">
         {/* LEFT: Problem Details */}
-        <div className="w-1/2 p-6 bg-[#1a1a1a] rounded-md shadow-md h-[calc(100vh-3rem)] overflow-y-auto">
-
+        <div className="w-1/2 p-6 bg-[#1a1a1a] rounded-md shadow-md overflow-y-auto flex-grow">
           <h2 className="text-3xl font-bold mb-4">{problem.title}</h2>
           <p className="mb-3 text-m text-gray-400 capitalize">
             {problem.difficulty}
@@ -142,6 +178,80 @@ export default function ProblemPage() {
             onChange={(val) => setCode(val)}
             className="flex-1 rounded"
           />
+          <div className="mt-6 bg-[#1e1e1e] p-4 rounded border border-[#2d2d2d]">
+  <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+    🧪 Testcases
+  </h3>
+
+  {/* Tabs with add button */}
+  <div className="flex items-center gap-2 mb-4 flex-wrap">
+    {[...testCases, ...customCases].map((_, idx) => (
+      <div
+        key={idx}
+        className={`relative px-4 py-1.5 rounded text-sm cursor-pointer transition-colors ${
+          idx === selectedCase ? "bg-gray-700 text-white" : "bg-[#333] text-gray-300 hover:bg-[#444]"
+        }`}
+        onClick={() => setSelectedCase(idx)}
+      >
+        Case {idx + 1}
+        {idx >= testCases.length && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const updated = [...customCases];
+              updated.splice(idx - testCases.length, 1);
+              setCustomCases(updated);
+              setOutputs((prev) => {
+                const updatedOutputs = [...prev];
+                updatedOutputs.splice(idx, 1);
+                return updatedOutputs;
+              });
+              if (selectedCase === idx) setSelectedCase(0);
+            }}
+            className="absolute -top-2 -right-2 bg-[#222] hover:bg-red-600 text-white text-xs rounded-full px-1"
+          >
+            ×
+          </button>
+        )}
+      </div>
+    ))}
+
+    {/* Add Testcase button */}
+    <button
+      onClick={() => {
+        if (currentInput.trim()) {
+          setCustomCases([...customCases, currentInput.trim()]);
+          setCurrentInput("");
+        }
+      }}
+      className="px-4 py-1.5 text-sm bg-gray-600 hover:bg-gray-500 text-white rounded"
+    >
+      ➕ Add Testcase
+    </button>
+  </div>
+
+  {/* Testcase Display */}
+  <div className="bg-[#2a2a2a] p-4 rounded text-green-300 whitespace-pre-wrap mb-2 text-sm">
+    <div>
+      <strong>Input:</strong> {allInputs[selectedCase] || "No input"}
+    </div>
+    <div className="mt-2 text-blue-300">
+      <strong>Output:</strong> {outputs[selectedCase] ?? "Run to see output"}
+    </div>
+  </div>
+
+  {/* Custom Input Textarea */}
+  <textarea
+    className="w-full bg-[#0d0d0d] text-white border border-[#333] p-2 rounded mt-2 text-sm"
+    rows="3"
+    placeholder="Enter custom input..."
+    value={currentInput}
+    onChange={(e) => setCurrentInput(e.target.value)}
+  />
+</div>
+
+
+
         </div>
       </div>
     </div>
