@@ -24,9 +24,13 @@ export default function UserDashboard() {
   };
 
   const toggleFavorite = async (id) => {
-    await axios.patch(`http://localhost:5000/api/user/favorite/${id}`, {}, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    await axios.patch(
+      `http://localhost:5000/api/user/favorite/${id}`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     fetchData();
   };
 
@@ -34,38 +38,46 @@ export default function UserDashboard() {
     fetchData();
   }, []);
 
-  const filtered = problems.filter(p => {
+  const filtered = problems.filter((p) => {
     return (
       (difficulty === "All" || p.difficulty === difficulty) &&
-      (status === "All" || (status === "Solved" && p.solved) || (status === "Unsolved" && !p.solved)) &&
+      (status === "All" ||
+        (status === "Solved" && p.solved) ||
+        (status === "Unsolved" && !p.solved)) &&
       (search === "" || p.title.toLowerCase().includes(search.toLowerCase())) &&
       (activeTab === "Problems" || (activeTab === "Favorites" && p.favorite))
     );
   });
 
   const total = problems.length;
-  const solved = problems.filter(p => p.solved).length;
+  const solved = problems.filter((p) => p.solved).length;
 
   return (
     <div className="flex bg-black text-white min-h-screen relative">
       {/* Toggle Sidebar Button */}
-      
 
       {/* Sidebar */}
-      <div className={`transition-all duration-300 h-screen bg-gray-900 ${sidebarOpen ? "w-64" : "w-16"} fixed`}>
+      <div
+        className={`transition-all duration-300 h-screen bg-gray-900 ${
+          sidebarOpen ? "w-64" : "w-16"
+        } fixed`}
+      >
         <Sidebar
-  solved={solved}
-  total={total}
-  activeTab={activeTab}
-  setActiveTab={setActiveTab}
-  collapsed={!sidebarOpen}
-  toggleCollapse={() => setSidebarOpen(prev => !prev)} // add this
-/>
-
+          solved={solved}
+          total={total}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          collapsed={!sidebarOpen}
+          toggleCollapse={() => setSidebarOpen((prev) => !prev)} // add this
+        />
       </div>
 
       {/* Main Content */}
-      <div className={`transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-16"} w-full p-10`}>
+      <div
+        className={`transition-all duration-300 ${
+          sidebarOpen ? "ml-64" : "ml-16"
+        } w-full p-10`}
+      >
         <h1 className="text-5xl font-extrabold mb-8 p-5 text-center animate-pulse text-blue-400">
           🚀 Welcome to CodeSpace
         </h1>
@@ -75,7 +87,7 @@ export default function UserDashboard() {
             className="bg-gray-800 p-2 rounded w-1/2"
             placeholder="🔍 Search..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
           />
           <div className="flex gap-6">
             <div className="relative w-40">
@@ -123,7 +135,10 @@ export default function UserDashboard() {
           </thead>
           <tbody>
             {filtered.map((p, idx) => (
-              <tr key={p._id} className="border-b border-gray-800 hover:bg-gray-800">
+              <tr
+                key={p._id}
+                className="border-b border-gray-800 hover:bg-gray-800"
+              >
                 <td className="p-2">{idx + 1}</td>
                 <td
                   className="p-2 text-blue-400 hover:underline cursor-pointer"
@@ -131,11 +146,24 @@ export default function UserDashboard() {
                 >
                   {p.title}
                 </td>
-                <td className="p-2 capitalize text-yellow-400">{p.difficulty}</td>
-                <td className="p-2 text-green-400">{p.solved ? "✔" : "❌"}</td>
+                <td className="p-2 capitalize text-yellow-400">
+                  {p.difficulty}
+                </td>
+                <td
+                  className={`p-2 ${
+                    p.solved ? "text-green-400" : "text-red-400"
+                  }`}
+                >
+                  {p.solved ? "Solved" : "Unsolved"}
+                </td>
+
                 <td className="p-2">
                   <button onClick={() => toggleFavorite(p._id)}>
-                    {p.favorite ? <FaStar className="text-yellow-300" /> : <FaRegStar />}
+                    {p.favorite ? (
+                      <FaStar className="text-yellow-300" />
+                    ) : (
+                      <FaRegStar />
+                    )}
                   </button>
                 </td>
               </tr>

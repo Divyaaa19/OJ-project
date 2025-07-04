@@ -29,13 +29,13 @@ export default function Sidebar({ solved, total, activeTab, setActiveTab, collap
 
         {/* Pie Chart */}
         {!collapsed && (
-          <div className="h-40 w-full mb-6">
+          <div className="h-40 ml-4 w-full mb-6">
             <PieChart solved={solved} total={total} />
           </div>
         )}
 
         {/* Tabs */}
-        <nav className="space-y-2 w-full flex flex-col items-center">
+        <nav className="space-y-2 w-full flex mt-6 flex-col items-center">
           <SidebarTab
             label="Problems"
             icon={<FaTachometerAlt />}

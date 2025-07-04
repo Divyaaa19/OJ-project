@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 const testCaseSchema = new mongoose.Schema({
   input: { type: String, required: true },
   output: { type: String, required: true },
-  explanation: { type: String, required: false }, // optional
+  explanation: { type: String, required: false },
+  hidden: { type: Boolean, default: false } // optional
 }); // optional: prevents auto-adding _id to each test case
 
 

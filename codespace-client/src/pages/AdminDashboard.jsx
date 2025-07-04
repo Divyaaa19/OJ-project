@@ -128,6 +128,10 @@ const handleLogout = () => {
 >
   ➕ Add New Problem
 </button>
+<p className="text-gray-400 mt-2 text-sm italic">
+  ⚠️ Ensure that inputs follow standard format like:<br/>
+  <code className="text-green-300">4<br/>2 7 11 15<br/>9</code>
+</p>
 
       </div>
     </div>

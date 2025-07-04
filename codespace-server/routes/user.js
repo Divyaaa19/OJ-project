@@ -2,24 +2,95 @@ const express = require("express");
 const router = express.Router();
 const Problem = require("../models/Problem");
 const User = require("../models/User");
-const verifyUser = require("../middleware/verifyUser");
+const verifyUser = require("../middleware/verifyUser"); // or wherever it's defined
+const Submission = require("../models/Submission");
+const UserProblem = require("../models/UserProblem");
+const mongoose=require("mongoose")
+
+
+// Get all submissions by the logged-in user for a specific problem
+router.get("/submissions/:problemId", verifyUser, async (req, res) => {
+  const { problemId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const submissions = await Submission.find({ userId, problemId }).sort({ timestamp: -1 });
+    res.json(submissions);
+  } catch (error) {
+    console.error("Failed to fetch submissions:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 router.get("/dashboard", verifyUser, async (req, res) => {
-  const problems = await Problem.find().select("title difficulty");
-  const user = req.user;
-  const solved = user.solvedProblems.map(id => id.toString());
-  const favorites = user.favoriteProblems  || [];
+  const userId = req.user.id;
 
-  const result = problems.map(p => ({
-    _id: p._id,
-    title: p.title,
-    difficulty: p.difficulty,
-    solved: solved.includes(p._id.toString()),
-    favorite: favorites.includes(p._id.toString())
-  }));
+  const problems = await Problem.find().select("title difficulty");
+
+  // Get all statuses from UserProblem
+  const userStatuses = await UserProblem.find({ userId });
+
+  // Map of problemId -> status
+  const statusMap = new Map();
+  userStatuses.forEach((entry) => {
+    statusMap.set(entry.problemId.toString(), entry.status);
+  });
+
+  // Assume "Unsolved" if no entry exists
+  const result = problems.map((p) => {
+    const status = statusMap.get(p._id.toString()) || "Unsolved";
+    return {
+      _id: p._id,
+      title: p.title,
+      difficulty: p.difficulty,
+      solved: status === "Solved",
+      favorite: req.user.favoriteProblems?.includes(p._id.toString()) || false,
+    };
+  });
 
   res.json(result);
 });
+
+
+// routes/user.js
+router.post('/submit', verifyUser, async (req, res) => {
+  const { problemId, code, language, timestamp } = req.body;
+  const userId = req.user.id;
+
+  await Submission.create({
+    userId,
+    problemId,
+    code,
+    language,
+    timestamp,
+  });
+
+  res.json({ message: "Submission saved" });
+});
+
+router.post('/mark-solved', verifyUser, async (req, res) => {
+  try {
+    const { problemId } = req.body;
+    const userId = req.user.id;
+
+    // Convert to ObjectId explicitly
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const problemObjectId = new  mongoose.Types.ObjectId(problemId);
+
+    await UserProblem.updateOne(
+      { userId: userObjectId, problemId: problemObjectId },
+      { $set: { status: "Solved" } },
+      { upsert: true }
+    );
+
+    res.json({ message: "Problem marked as solved" });
+  } catch (error) {
+    console.error("❌ mark-solved error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
 
 
 router.patch("/favorite/:problemId", verifyUser, async (req, res) => {

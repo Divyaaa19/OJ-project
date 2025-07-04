@@ -9,3 +9,18 @@ html, body {
   background-color: #000; /* full black background */
   color: white;
 }
+.gutter {
+  background-color: #444;
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+
+.gutter.gutter-horizontal {
+  cursor: col-resize;
+  width: 8px;
+}
+
+.gutter.gutter-vertical {
+  cursor: row-resize;
+  height: 8px;
+}
