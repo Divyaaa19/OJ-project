@@ -62,7 +62,7 @@ router.post('/submit', verifyUser, async (req, res) => {
     problemId,
     code,
     language,
-    timestamp,
+    timestamp: new Date(),
   });
 
   res.json({ message: "Submission saved" });
