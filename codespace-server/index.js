@@ -30,7 +30,8 @@ app.use("/api/ai", aiRoutes);
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log("✅ Connected to MongoDB");
-    app.listen(5000, () => console.log("🚀 Server started on port 5000"));
+    const PORT = process.env.PORT || 4000;
+    app.listen(PORT, () => console.log(`🚀 Server started on port ${PORT}`));
   })
   .catch(err => {
     console.error("❌ Failed to connect to MongoDB:", err.message);
