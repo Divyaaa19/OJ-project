@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaStar, FaRegStar } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import Activity from "../components/Activity";
 
 export default function UserDashboard() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ export default function UserDashboard() {
   const [status, setStatus] = useState("All");
   const [activeTab, setActiveTab] = useState("Problems");
   const [sidebarOpen, setSidebarOpen] = useState(true); // toggle state
+  const [userName, setUserName] = useState("");
 
   const token = localStorage.getItem("token");
 
@@ -34,7 +36,19 @@ export default function UserDashboard() {
     fetchData();
   };
 
+  // Fetch user name for greeting
   useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/user/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUserName(res.data.name || "User");
+      } catch {
+        setUserName("User");
+      }
+    };
+    fetchUser();
     fetchData();
   }, []);
 
@@ -68,7 +82,8 @@ export default function UserDashboard() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           collapsed={!sidebarOpen}
-          toggleCollapse={() => setSidebarOpen((prev) => !prev)} // add this
+          toggleCollapse={() => setSidebarOpen((prev) => !prev)}
+          userName={userName}
         />
       </div>
 
@@ -78,98 +93,110 @@ export default function UserDashboard() {
           sidebarOpen ? "ml-64" : "ml-16"
         } w-full p-10`}
       >
-        <h1 className="text-5xl font-extrabold mb-8 p-5 text-center animate-pulse text-blue-400">
-          🚀 Welcome to CodeSpace
-        </h1>
-
-        <div className="flex justify-between mb-4">
-          <input
-            className="bg-gray-800 p-2 rounded w-1/2"
-            placeholder="🔍 Search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <div className="flex gap-6">
-            <div className="relative w-40">
-              <select
-                className="block appearance-none w-full bg-gray-800 text-white border border-gray-600 hover:border-gray-400 px-4 py-2 pr-8 rounded-md leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={difficulty}
-                onChange={(e) => setDifficulty(e.target.value)}
-              >
-                <option>All</option>
-                <option>Easy</option>
-                <option>Medium</option>
-                <option>Hard</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-white">
-                ▼
+        {activeTab === "Activity" ? (
+          <Activity />
+        ) : (
+        <>
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-8 p-5 text-center bg-gradient-to-r from-blue-300 via-fuchsia-400 to-pink-300 text-transparent bg-clip-text drop-shadow-lg">
+            CodeSpace Dashboard
+          </h1>
+          <div className="flex justify-between mb-6">
+            <input
+              className="bg-white/10 backdrop-blur-md border border-blue-400/30 p-3 rounded-xl w-1/2 text-white placeholder:text-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 shadow-md"
+              placeholder="Search problems..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <div className="flex gap-6">
+              <div className="relative w-40">
+                <select
+                  className="block appearance-none w-full bg-white/10 backdrop-blur-md text-white border border-blue-400/30 hover:border-blue-400 px-4 py-2 pr-8 rounded-xl leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200"
+                  value={difficulty}
+                  onChange={(e) => setDifficulty(e.target.value)}
+                >
+                  <option>All</option>
+                  <option>Easy</option>
+                  <option>Medium</option>
+                  <option>Hard</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-white">
+                  ▼
+                </div>
               </div>
-            </div>
 
-            <div className="relative w-40">
-              <select
-                className="block appearance-none w-full bg-gray-800 text-white border border-gray-600 hover:border-gray-400 px-4 py-2 pr-8 rounded-md leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
-                <option>All</option>
-                <option>Solved</option>
-                <option>Unsolved</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-white">
-                ▼
+              <div className="relative w-40">
+                <select
+                  className="block appearance-none w-full bg-white/10 backdrop-blur-md text-white border border-blue-400/30 hover:border-blue-400 px-4 py-2 pr-8 rounded-xl leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                >
+                  <option>All</option>
+                  <option>Solved</option>
+                  <option>Unsolved</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-white">
+                  ▼
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <table className="w-full text-left">
-          <thead>
-            <tr className="text-gray-400 border-b border-gray-600">
-              <th className="p-2">#</th>
-              <th className="p-2">Title</th>
-              <th className="p-2">Difficulty</th>
-              <th className="p-2">Status</th>
-              <th className="p-2">Fav</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((p, idx) => (
-              <tr
-                key={p._id}
-                className="border-b border-gray-800 hover:bg-gray-800"
-              >
-                <td className="p-2">{idx + 1}</td>
-                <td
-                  className="p-2 text-blue-400 hover:underline cursor-pointer"
-                  onClick={() => navigate(`/user-problems/${p._id}`)}
-                >
-                  {p.title}
-                </td>
-                <td className="p-2 capitalize text-yellow-400">
-                  {p.difficulty}
-                </td>
-                <td
-                  className={`p-2 ${
-                    p.solved ? "text-green-400" : "text-red-400"
-                  }`}
-                >
-                  {p.solved ? "Solved" : "Unsolved"}
-                </td>
-
-                <td className="p-2">
-                  <button onClick={() => toggleFavorite(p._id)}>
-                    {p.favorite ? (
-                      <FaStar className="text-yellow-300" />
-                    ) : (
-                      <FaRegStar />
-                    )}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl border border-blue-400/20 p-2 md:p-6 overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="text-blue-200 border-b border-blue-400/30">
+                  <th className="p-3 font-semibold">#</th>
+                  <th className="p-3 font-semibold">Title</th>
+                  <th className="p-3 font-semibold">Difficulty</th>
+                  <th className="p-3 font-semibold">Status</th>
+                  <th className="p-3 font-semibold">Fav</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((p, idx) => (
+                  <tr
+                    key={p._id}
+                    className="border-b border-blue-400/10 hover:bg-blue-400/10 transition-all duration-200 group"
+                  >
+                    <td className="p-3 text-blue-100 group-hover:text-white font-semibold">{idx + 1}</td>
+                    <td
+                      className="p-3 text-blue-300 group-hover:text-white hover:underline cursor-pointer font-semibold"
+                      onClick={() => navigate(`/user-problems/${p._id}`)}
+                    >
+                      {p.title}
+                    </td>
+                    <td className="p-3">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-md
+                        ${p.difficulty === 'Easy' ? 'bg-green-400/20 text-green-300 border border-green-400/40' :
+                          p.difficulty === 'Medium' ? 'bg-yellow-400/20 text-yellow-200 border border-yellow-400/40' :
+                          'bg-red-400/20 text-red-200 border border-red-400/40'}`}
+                      >
+                        {p.difficulty}
+                      </span>
+                    </td>
+                    <td className="p-3">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-md
+                        ${p.solved ? 'bg-blue-400/20 text-blue-200 border border-blue-400/40' : 'bg-gray-700 text-gray-300 border border-gray-500/40'}`}
+                      >
+                        {p.solved ? 'Solved' : 'Unsolved'}
+                      </span>
+                    </td>
+                    <td className="p-3">
+                      <button onClick={() => toggleFavorite(p._id)}>
+                        {p.favorite ? (
+                          <FaStar className="text-yellow-300 drop-shadow" />
+                        ) : (
+                          <FaRegStar className="text-blue-200 group-hover:text-yellow-200" />
+                        )}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+        )}
       </div>
     </div>
   );

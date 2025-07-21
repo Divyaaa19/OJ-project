@@ -29,3 +29,63 @@ html, body {
   padding: 2px 0;
 }
 
+@keyframes shine {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 10px #fff3); }
+  50% { filter: brightness(1.2) drop-shadow(0 0 30px #fff8); }
+}
+.animate-shine {
+  animation: shine 3s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+.animate-twinkle {
+  animation: twinkle 2.5s ease-in-out infinite;
+}
+
+@keyframes shooting-star {
+  0% { opacity: 0; transform: translateX(0) scaleX(0.7); }
+  10% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(120px) scaleX(1); }
+}
+.animate-shooting-star {
+  animation: shooting-star 3.5s linear infinite;
+  animation-delay: calc(var(--i, 0) * 0.7s);
+}
+
+@keyframes planet-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-18px); }
+}
+.animate-planet-float {
+  animation: planet-float 7s ease-in-out infinite;
+}
+.animate-planet-float2 {
+  animation: planet-float 9s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% { text-shadow: 0 0 8px #fff, 0 0 16px #7f5af0; }
+  50% { text-shadow: 0 0 24px #fff, 0 0 32px #7f5af0; }
+}
+.animate-glow {
+  animation: glow 2.5s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+.animate-float2 {
+  animation: float 5s ease-in-out infinite;
+}
+.animate-float3 {
+  animation: float 6s ease-in-out infinite;
+}
+

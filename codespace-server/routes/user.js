@@ -7,6 +7,21 @@ const Submission = require("../models/Submission");
 const UserProblem = require("../models/UserProblem");
 const mongoose=require("mongoose")
 
+router.get("/profile", verifyUser, async (req, res) => {
+  try {
+    const user = req.user; // from verifyUser middleware
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      favoriteProblems: user.favoriteProblems || [],
+    });
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 // Get all submissions by the logged-in user for a specific problem
 router.get("/submissions/:problemId", verifyUser, async (req, res) => {
@@ -18,6 +33,18 @@ router.get("/submissions/:problemId", verifyUser, async (req, res) => {
     res.json(submissions);
   } catch (error) {
     console.error("Failed to fetch submissions:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Get all submissions by the logged-in user (for Activity page)
+router.get("/submissions", verifyUser, async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const submissions = await Submission.find({ userId }).sort({ timestamp: -1 });
+    res.json(submissions);
+  } catch (error) {
+    console.error("Failed to fetch all submissions:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
