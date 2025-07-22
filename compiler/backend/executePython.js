@@ -5,9 +5,12 @@ const executePython = (filepath, inputFilePath) => {
     const command = `python "${filepath}" < "${inputFilePath}"`;
     exec(command, { timeout: 2000 }, (error, stdout, stderr) => {
       if (error) {
+        if (error.killed && error.signal === 'SIGKILL') {
+          return resolve("Memory Limit Exceeded");
+        }
         if (error.killed || error.signal === 'SIGTERM' || error.code === null) {
           return resolve("Time Limit Exceeded");
-        } 
+        }
         if (stderr && /cannot allocate memory|memoryerror/i.test(stderr)) {
           return resolve("Memory Limit Exceeded");
         }

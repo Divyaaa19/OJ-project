@@ -13,9 +13,12 @@ const executeCpp = (filepath, inputFilePath) => {
   const outPath = path.join(outputPath, `${jobId}.exe`);
 
   return new Promise((resolve, reject) => {
-    const command = `ulimit -v 262144; g++ ${filepath} -o ${outPath} && ${outPath} < ${inputFilePath}`;
+    const command = `g++ ${filepath} -o ${outPath} && ${outPath} < ${inputFilePath}`;
     exec(command, { timeout: 2000 }, (error, stdout, stderr) => {
       if (error) {
+        if (error.killed && error.signal === 'SIGKILL') {
+          return resolve("Memory Limit Exceeded");
+        }
         if (error.killed || error.signal === 'SIGTERM' || error.code === null) {
           return resolve("Time Limit Exceeded");
         }

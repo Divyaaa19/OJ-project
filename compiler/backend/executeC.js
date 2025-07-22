@@ -13,6 +13,9 @@ const executeC = (filepath, inputFilePath) => {
     const command = `gcc ${filepath} -o ${outPath} && ${outPath} < ${inputFilePath}`;
     exec(command, { timeout: 2000 }, (error, stdout, stderr) => {
       if (error) {
+        if (error.killed && error.signal === 'SIGKILL') {
+          return resolve("Memory Limit Exceeded");
+        }
         if (error.killed || error.signal === 'SIGTERM' || error.code === null) {
           return resolve("Time Limit Exceeded");
         }
