@@ -10,6 +10,8 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import ReactMarkdown from "react-markdown";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -80,6 +82,11 @@ export default function UserProblemPage() {
 
   const [isRunning, setIsRunning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Verdict memory per language
+  const [verdictMemory, setVerdictMemory] = useState({}); // { [lang]: { verdicts, outputs, finalVerdict } }
+  // Code memory per language
+  const [codeMemory, setCodeMemory] = useState({}); // { [lang]: code }
 
   const getVerdictColor = (verdict) => {
     switch (verdict) {
@@ -177,7 +184,13 @@ const getAIReview = async () => {
   const handleLanguageChange = (e) => {
     const lang = e.target.value;
     setLanguage(lang);
-    setCode(templates[lang]);
+    // Restore code for this language, or use template
+    setCode(codeMemory[lang] || templates[lang]);
+    // Restore verdicts/outputs/finalVerdict for this language, or reset
+    const mem = verdictMemory[lang] || { verdicts: [], outputs: [], finalVerdict: "" };
+    setVerdicts(mem.verdicts);
+    setOutputs(mem.outputs);
+    setFinalVerdict(mem.finalVerdict);
   };
 
   // Modal
@@ -263,125 +276,149 @@ const getAIReview = async () => {
     }
     setOutputs(results);
     setVerdicts(verdictList);
+    setVerdictMemory((prev) => ({
+      ...prev,
+      [language]: {
+        verdicts: verdictList,
+        outputs: results,
+        finalVerdict: "", // runCode does not set final verdict
+      },
+    }));
     if (selectedCase >= allInputs.length) setSelectedCase(0);
     setIsRunning(false);
   };
 
   const submitCode = async () => {
     setIsSubmitting(true);
-    if (!problem?.testCases) return;
-    const allCases = problem.testCases;
-    const results = [];
-    const verdictList = [];
+    try {
+      if (!problem?.testCases) return;
+      const allCases = problem.testCases;
+      const results = [];
+      const verdictList = [];
 
-    for (let i = 0; i < allCases.length; i++) {
-      const { input, output: expectedRaw } = allCases[i];
-      try {
-        const res = await axios.post("http://localhost:8000/run", {
-          language,
-          code,
-          input: input.trim(),
-        });
-        const output = (res.data.output || "").trim().replace(/\s+/g, " ");
-        const expected = (expectedRaw || "").trim().replace(/\s+/g, " ");
-        let verdict = "";
-        if (/time limit exceeded/i.test(output)) {
-          verdict = "TLE ⏰";
-        } else if (/memory limit exceeded/i.test(output)) {
-          verdict = "MLE 🧠";
-        } else if (output === expected) {
-          verdict = "Accepted";
-        } else {
-          verdict = "Wrong Answer";
+      for (let i = 0; i < allCases.length; i++) {
+        const { input, output: expectedRaw } = allCases[i];
+        try {
+          const res = await axios.post("http://localhost:8000/run", {
+            language,
+            code,
+            input: input.trim(),
+          });
+          const output = (res.data.output || "").trim().replace(/\s+/g, " ");
+          const expected = (expectedRaw || "").trim().replace(/\s+/g, " ");
+          let verdict = "";
+          if (/time limit exceeded/i.test(output)) {
+            verdict = "TLE ⏰";
+          } else if (/memory limit exceeded/i.test(output)) {
+            verdict = "MLE 🧠";
+          } else if (output === expected) {
+            verdict = "Accepted";
+          } else {
+            verdict = "Wrong Answer";
+          }
+          results.push({ input, output, expected, verdict });
+          verdictList.push(verdict);
+        } catch {
+          results.push({
+            input,
+            output: "Error",
+            expected: "",
+            verdict: "Error ❌",
+          });
+          verdictList.push("Error ❌");
         }
-        results.push({ input, output, expected, verdict });
-        verdictList.push(verdict);
-      } catch {
-        results.push({
-          input,
-          output: "Error",
-          expected: "",
-          verdict: "Error ❌",
-        });
-        verdictList.push("Error ❌");
       }
-    }
 
-    setOutputs(results.map(r => r.output));
-    setVerdicts(verdictList);
+      setOutputs(results.map(r => r.output));
+      setVerdicts(verdictList);
 
-    const allAccepted = verdictList.every((v) => v === "Accepted");
+      const allAccepted = verdictList.every((v) => v === "Accepted");
 
-    if (allAccepted) {
-      setFinalVerdict("Accepted");
-      setShowEdgeCasesButton(false); // Hide edge cases button on success
-      setShowEdgeCasesModal(false); // Hide modal on success
-      setEdgeCases("");
-      alert("✅ All test cases passed! Code submitted successfully.");
-      const token = localStorage.getItem("token");
-      await axios.post(
-        "http://localhost:5000/api/user/mark-solved",
-        { problemId: id },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      if (allAccepted) {
+        setFinalVerdict("Accepted");
+        setShowEdgeCasesButton(false); // Hide edge cases button on success
+        setShowEdgeCasesModal(false); // Hide modal on success
+        setEdgeCases("");
+        toast.success("✅ All test cases passed! Code submitted successfully.");
 
-      // After marking problem as solved:
-      const aiRes = await axios.post(
-        "http://localhost:5000/api/ai/complexity",
-        {
-          code,
-          language,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const token = localStorage.getItem("token");
+        await axios.post(
+          "http://localhost:5000/api/user/mark-solved",
+          { problemId: id },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        // After marking problem as solved:
+        const aiRes = await axios.post(
+          "http://localhost:5000/api/ai/complexity",
+          {
+            code,
+            language,
           },
-        }
-      );
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
-      setTcScEstimation(aiRes.data.complexity); // Save to state
-      setShowReviewButton(true);
-      console.log("📦 showReviewButton is now true");
-      console.log("📦 Submissions length:", submissions.length);
+        setTcScEstimation(aiRes.data.complexity); // Save to state
+        setShowReviewButton(true);
 
-      await axios.post(
-        "http://localhost:5000/api/user/submit",
-        {
-          problemId: id,
-          code,
-          language,
-          verdict: "Accepted",
+        await axios.post(
+          "http://localhost:5000/api/user/submit",
+          {
+            problemId: id,
+            code,
+            language,
+            verdict: "Accepted",
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        const updated = await axios.get(
+          `http://localhost:5000/api/user/submissions/${id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setSubmissions(updated.data);
+        setActiveTab("submissions");
+      } else {
+        setFinalVerdict("");
+        setShowEdgeCasesButton(true); // Show edge cases button on failure
+        setShowEdgeCasesModal(false); // Hide modal until button is clicked
+        setEdgeCases("");
+        toast.error("❌ Some test cases failed. Please try again.");
+        // Save failed submission
+        const token = localStorage.getItem("token");
+        await axios.post(
+          "http://localhost:5000/api/user/submit",
+          {
+            problemId: id,
+            code,
+            language,
+            verdict: "Wrong Answer",
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        // Update submissions list after failed submission
+        const updated = await axios.get(
+          `http://localhost:5000/api/user/submissions/${id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setSubmissions(updated.data);
+        setActiveTab("submissions");
+      }
+      setVerdictMemory((prev) => ({
+        ...prev,
+        [language]: {
+          verdicts: verdictList,
+          outputs: results.map(r => r.output),
+          finalVerdict: allAccepted ? "Accepted" : "",
         },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      const updated = await axios.get(
-        `http://localhost:5000/api/user/submissions/${id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setSubmissions(updated.data);
-      setActiveTab("submissions");
-    } else {
-      setFinalVerdict("");
-      setShowEdgeCasesButton(true); // Show edge cases button on failure
-      setShowEdgeCasesModal(false); // Hide modal until button is clicked
-      setEdgeCases("");
-      alert("❌ Some test cases failed. Please try again.");
-      
-      // Save failed submission
-      const token = localStorage.getItem("token");
-      await axios.post(
-        "http://localhost:5000/api/user/submit",
-        {
-          problemId: id,
-          code,
-          language,
-          verdict: "Wrong Answer",
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      }));
+    } finally {
+      setIsSubmitting(false);
+      console.log('isSubmitting set to false after submitCode');
+      setTimeout(() => setIsSubmitting(false), 1000); // force reset after 1s as a fallback
     }
-    setIsSubmitting(false);
   };
 
   const handleShowEdgeCases = async () => {
@@ -438,10 +475,17 @@ const getAIReview = async () => {
     return '\n' + list;
   }
 
+  // When user edits code, update code and codeMemory
+  const handleCodeChange = (val) => {
+    setCode(val);
+    setCodeMemory((prev) => ({ ...prev, [language]: val }));
+  };
+
   if (!problem) return <div className="text-white p-6">Loading...</div>;
 
   return (
-    <div className="h-screen w-screen text-white flex" style={{background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'}}>
+    <div className="h-screen w-screen text-white bg-gradient-to-br from-[#0f172a] via-[#181c2f] to-[#232946] flex">
+      <ToastContainer position="top-center" autoClose={3000} />
       <Split
         className="flex h-full w-full min-h-0 overflow-hidden"
         sizes={[40, 60]}
@@ -681,7 +725,7 @@ const getAIReview = async () => {
                       ? [java()]
                       : [cpp()]
                   }
-                  onChange={(val) => setCode(val)}
+                  onChange={handleCodeChange}
                   basicSetup={{ lineNumbers: true }}
                 />
               </div>

@@ -52,4 +52,4 @@ echo "Python test completed."
 echo "=== All language tests completed! ==="
 
 # Clean up
-rm -f test.c test.cpp test_c test_cpp Test.java Test.class test.py 
+rm -f test.c test.cpp test_c test_cpp Test.java Test.class test.py

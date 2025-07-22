@@ -7,6 +7,8 @@ import CodeMirror from "@uiw/react-codemirror";
 import { cpp } from "@codemirror/lang-cpp";
 import { python } from "@codemirror/lang-python";
 import { java } from "@codemirror/lang-java";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const codeTemplates = {
   cpp: `#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    // your code here\n    return 0;\n}`,
@@ -90,10 +92,10 @@ export default function EditProblem() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      alert("Problem updated!");
+      toast.success("Problem updated!");
       navigate("/admin-dashboard");
     } catch (err) {
-      alert("Update failed.");
+      toast.error("Update failed.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -345,10 +347,10 @@ export default function EditProblem() {
                       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                     });
                     setTestResults(res.data.results);
-                    alert(res.data.verdict === "Accepted" ? "All test cases passed!" : "Some test cases failed.");
+                    toast.success(res.data.verdict === "Accepted" ? "All test cases passed!" : "Some test cases failed.");
                   } catch (err) {
                     console.error('Admin test run error:', err);
-                    alert("Test run failed. Please check your code and try again.");
+                    toast.error("Test run failed. Please check your code and try again.");
                     setTestResults([]);
                   } finally {
                     setIsTesting(false);
@@ -423,6 +425,7 @@ export default function EditProblem() {
           </form>
         </div>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }

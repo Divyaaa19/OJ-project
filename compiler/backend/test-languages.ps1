@@ -50,4 +50,4 @@ Write-Host "Python test completed." -ForegroundColor Green
 Write-Host "=== All language tests completed! ===" -ForegroundColor Green
 
 # Clean up
-Remove-Item -Path "test.c", "test.cpp", "test_c.exe", "test_cpp.exe", "Test.java", "Test.class", "test.py" -ErrorAction SilentlyContinue 
+Remove-Item -Path "test.c", "test.cpp", "test_c.exe", "test_cpp.exe", "Test.java", "Test.class", "test.py" -ErrorAction SilentlyContinue

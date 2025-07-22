@@ -1,6 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -17,7 +19,7 @@ export default function Login() {
       localStorage.setItem("token", token);
       localStorage.setItem("role", role); // optional
 
-      alert("Welcome to CodeSpace!");
+      toast.success("Welcome to CodeSpace!");
 
       if (role === "admin") {
         navigate("/admin-dashboard");
@@ -25,7 +27,7 @@ export default function Login() {
         navigate("/user-dashboard");
       }
     } catch (err) {
-      alert(err.response?.data?.message || "Login failed.");
+      toast.error(err.response?.data?.message || "Login failed.");
     }
   };
 
@@ -70,6 +72,7 @@ export default function Login() {
           </span>
         </div>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }

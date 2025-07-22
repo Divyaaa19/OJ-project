@@ -7,6 +7,8 @@ import CodeMirror from "@uiw/react-codemirror";
 import { cpp } from "@codemirror/lang-cpp";
 import { python } from "@codemirror/lang-python";
 import { java } from "@codemirror/lang-java";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function AddProblem() {
   const navigate = useNavigate();
@@ -83,10 +85,10 @@ export default function AddProblem() {
         }
       );
 
-      alert("Problem added successfully!");
+      toast.success("Problem added successfully!");
       navigate("/admin-dashboard");
     } catch (err) {
-      alert("Failed to add problem. Please try again.");
+      toast.error("Failed to add problem. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -120,9 +122,9 @@ export default function AddProblem() {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setTestResults(res.data.results);
-      alert(res.data.verdict === "Accepted" ? "All test cases passed!" : "Some test cases failed.");
+      toast.success(res.data.verdict === "Accepted" ? "All test cases passed!" : "Some test cases failed.");
     } catch (err) {
-      alert("Test run failed. Please check your code and try again.");
+      toast.error("Test run failed. Please check your code and try again.");
       setTestResults([]);
     } finally {
       setIsTesting(false);
@@ -439,6 +441,7 @@ export default function AddProblem() {
           </form>
         </div>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }
