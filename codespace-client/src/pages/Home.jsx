@@ -8,8 +8,11 @@ export default function Home() {
     const navigate = useNavigate(); 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white overflow-hidden relative">
-      {/* Star background animation */}
-      <div className="absolute inset-0 -z-10 animate-pulse opacity-20">
+      {/* Lighter, inviting space background gradient overlay */}
+      <div className="absolute inset-0 -z-20 bg-gradient-to-b from-gray-900 via-indigo-900 to-black overflow-hidden">
+        {/* Soft light gradient overlay */}
+        <div className="absolute inset-0 w-full h-full bg-gradient-radial from-blue-200/40 via-pink-200/30 to-transparent opacity-80 pointer-events-none" />
+        {/* Animated stars */}
         {[...Array(60)].map((_, i) => (
           <div
             key={i}
@@ -70,7 +73,7 @@ export default function Home() {
       </div>
 
       <div className="absolute bottom-0 w-full text-center text-sm text-gray-600 pb-4">
-        Made with 💙 in the Milky Way
+        Made with 💙
       </div>
     </div>
   );

@@ -72,6 +72,32 @@ export default function UserProblemPage() {
   };
   const [code, setCode] = useState(templates["cpp"]); // initial template
 
+  // Edge Cases state
+  const [showEdgeCasesButton, setShowEdgeCasesButton] = useState(false);
+  const [edgeCases, setEdgeCases] = useState("");
+  const [loadingEdgeCases, setLoadingEdgeCases] = useState(false);
+  const [showEdgeCasesModal, setShowEdgeCasesModal] = useState(false);
+
+  const [isRunning, setIsRunning] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const getVerdictColor = (verdict) => {
+    switch (verdict) {
+      case "Accepted":
+        return "text-green-400";
+      case "Wrong Answer":
+        return "text-red-400";
+      case "TLE ⏰":
+        return "text-yellow-400";
+      case "MLE 🧠":
+        return "text-orange-400";
+      case "Error ❌":
+        return "text-red-500";
+      default:
+        return "text-gray-400";
+    }
+  };
+
   const getComplexity = async () => {
     if (!code.trim()) return;
     setLoadingComplexity(true);
@@ -199,11 +225,18 @@ const getAIReview = async () => {
   }, [problem]);
 
   const runCode = async () => {
+    setIsRunning(true);
     const results = [];
     const verdictList = [];
 
     for (let i = 0; i < allInputs.length; i++) {
       const input = allInputs[i].input;
+      let expected = "";
+      if (i < problem.testCases.length) {
+        expected = (problem.testCases[i].output || "").trim().replace(/\s+/g, " ");
+      } else {
+        expected = (customCases[i - problem.testCases.length]?.output || "").trim().replace(/\s+/g, " ");
+      }
       try {
         const res = await axios.post("http://localhost:8000/run", {
           language,
@@ -211,16 +244,18 @@ const getAIReview = async () => {
           input: input.trim(),
         });
         const output = (res.data.output || "").trim().replace(/\s+/g, " ");
+        let verdict = "";
+        if (/time limit exceeded/i.test(output)) {
+          verdict = "TLE ⏰";
+        } else if (/memory limit exceeded/i.test(output)) {
+          verdict = "MLE 🧠";
+        } else if (output === expected) {
+          verdict = "Accepted ✅";
+        } else {
+          verdict = "Wrong Answer ❌";
+        }
+        verdictList.push(verdict);
         results.push(output);
-        const expected =
-          i < problem.testCases.length
-            ? problem.testCases[i].output?.trim().replace(/\s+/g, " ")
-            : customCases[i - problem.testCases.length]?.output
-                ?.trim()
-                .replace(/\s+/g, " ");
-        verdictList.push(
-          output === expected ? "Accepted ✅" : "Wrong Answer ❌"
-        );
       } catch {
         results.push("Error");
         verdictList.push("Error ❌");
@@ -229,12 +264,15 @@ const getAIReview = async () => {
     setOutputs(results);
     setVerdicts(verdictList);
     if (selectedCase >= allInputs.length) setSelectedCase(0);
+    setIsRunning(false);
   };
 
   const submitCode = async () => {
+    setIsSubmitting(true);
     if (!problem?.testCases) return;
     const allCases = problem.testCases;
     const results = [];
+    const verdictList = [];
 
     for (let i = 0; i < allCases.length; i++) {
       const { input, output: expectedRaw } = allCases[i];
@@ -246,8 +284,18 @@ const getAIReview = async () => {
         });
         const output = (res.data.output || "").trim().replace(/\s+/g, " ");
         const expected = (expectedRaw || "").trim().replace(/\s+/g, " ");
-        const verdict = output === expected ? "Accepted" : "Wrong Answer";
+        let verdict = "";
+        if (/time limit exceeded/i.test(output)) {
+          verdict = "TLE ⏰";
+        } else if (/memory limit exceeded/i.test(output)) {
+          verdict = "MLE 🧠";
+        } else if (output === expected) {
+          verdict = "Accepted";
+        } else {
+          verdict = "Wrong Answer";
+        }
         results.push({ input, output, expected, verdict });
+        verdictList.push(verdict);
       } catch {
         results.push({
           input,
@@ -255,17 +303,21 @@ const getAIReview = async () => {
           expected: "",
           verdict: "Error ❌",
         });
+        verdictList.push("Error ❌");
       }
     }
 
-    const allAccepted = results.every((r) => r.verdict === "Accepted");
+    setOutputs(results.map(r => r.output));
+    setVerdicts(verdictList);
+
+    const allAccepted = verdictList.every((v) => v === "Accepted");
 
     if (allAccepted) {
-      setOutputs([]);
-      setVerdicts([]);
       setFinalVerdict("Accepted");
+      setShowEdgeCasesButton(false); // Hide edge cases button on success
+      setShowEdgeCasesModal(false); // Hide modal on success
+      setEdgeCases("");
       alert("✅ All test cases passed! Code submitted successfully.");
-
       const token = localStorage.getItem("token");
       await axios.post(
         "http://localhost:5000/api/user/mark-solved",
@@ -298,6 +350,7 @@ const getAIReview = async () => {
           problemId: id,
           code,
           language,
+          verdict: "Accepted",
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -309,14 +362,86 @@ const getAIReview = async () => {
       setSubmissions(updated.data);
       setActiveTab("submissions");
     } else {
+      setFinalVerdict("");
+      setShowEdgeCasesButton(true); // Show edge cases button on failure
+      setShowEdgeCasesModal(false); // Hide modal until button is clicked
+      setEdgeCases("");
       alert("❌ Some test cases failed. Please try again.");
+      
+      // Save failed submission
+      const token = localStorage.getItem("token");
+      await axios.post(
+        "http://localhost:5000/api/user/submit",
+        {
+          problemId: id,
+          code,
+          language,
+          verdict: "Wrong Answer",
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    }
+    setIsSubmitting(false);
+  };
+
+  const handleShowEdgeCases = async () => {
+    setLoadingEdgeCases(true);
+    setShowEdgeCasesModal(true);
+    setEdgeCases("");
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        "http://localhost:5000/api/ai/edge-cases",
+        {
+          code,
+          language,
+          prompt: problem.description,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Edge cases API response:", res.data);
+      setEdgeCases(res.data.edgeCases || "No edge cases found.");
+      if (!res.data.edgeCases || !res.data.edgeCases.trim()) {
+        setTimeout(() => setShowEdgeCasesModal(false), 2000);
+      }
+    } catch (err) {
+      console.error("Edge cases API error:", err);
+      setEdgeCases("⚠️ Failed to fetch edge cases.");
+      setTimeout(() => setShowEdgeCasesModal(false), 2000);
+    } finally {
+      setLoadingEdgeCases(false);
     }
   };
+
+  function ensureBulletedList(text) {
+    if (!text) return "";
+    text = text.replace(/\r\n/g, '\n');
+    if (/^\s*[-*]\s+/m.test(text)) return text;
+    let lines = text.split('\n');
+    if (lines.length === 1) {
+      if (text.includes('. ')) {
+        lines = text.split('. ');
+      } else if (text.includes('; ')) {
+        lines = text.split('; ');
+      }
+    }
+    const list = lines
+      .map(line => {
+        const trimmed = line.trim().replace(/^[\d\-\*\.]+\s*/, '');
+        return trimmed ? `- ${trimmed}` : '';
+      })
+      .join('\n');
+    return '\n' + list;
+  }
 
   if (!problem) return <div className="text-white p-6">Loading...</div>;
 
   return (
-    <div className="h-screen w-screen text-white bg-[#0f0f0f] flex">
+    <div className="h-screen w-screen text-white flex" style={{background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'}}>
       <Split
         className="flex h-full w-full min-h-0 overflow-hidden"
         sizes={[40, 60]}
@@ -325,24 +450,24 @@ const getAIReview = async () => {
         gutterSize={8}
         style={{ display: "flex", height: "100%" }}
       >
-        <div className="overflow-auto bg-[#1a1a1a] p-8">
+        <div className="overflow-auto p-8 bg-[#101624]/80 backdrop-blur-xl rounded-2xl shadow-2xl m-4 border border-cyan-300/30">
           <div className="flex gap-4 mb-4">
             <button
               onClick={() => setActiveTab("description")}
-              className={`text-sm font-semibold border-b-2 px-2 pb-1 ${
+              className={`text-sm font-semibold border-b-2 px-2 pb-1 transition-all duration-200 ${
                 activeTab === "description"
-                  ? "border-blue-500 text-white"
-                  : "border-transparent text-gray-400"
+                  ? "border-cyan-300 text-cyan-300 bg-cyan-300/10 rounded-t"
+                  : "border-transparent text-cyan-200 hover:text-cyan-300"
               }`}
             >
               Description
             </button>
             <button
               onClick={() => setActiveTab("submissions")}
-              className={`text-sm font-semibold border-b-2 px-2 pb-1 ${
+              className={`text-sm font-semibold border-b-2 px-2 pb-1 transition-all duration-200 ${
                 activeTab === "submissions"
-                  ? "border-blue-500 text-white"
-                  : "border-transparent text-gray-400"
+                  ? "border-cyan-300 text-cyan-300 bg-cyan-300/10 rounded-t"
+                  : "border-transparent text-cyan-200 hover:text-cyan-300"
               }`}
             >
               Submissions
@@ -352,16 +477,16 @@ const getAIReview = async () => {
           {activeTab === "description" && (
             <>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold mb-2">{problem.title}</h2>
+                <h2 className="text-2xl font-bold mb-2 text-cyan-300 drop-shadow">{problem.title}</h2>
                 <span
-                  className="text-sm font-medium px-3 py-1 rounded-full capitalize"
+                  className="text-sm font-medium px-3 py-1 rounded-full capitalize border border-cyan-300/40"
                   style={{
                     backgroundColor:
                       problem.difficulty === "Easy"
-                        ? "rgba(34, 197, 94, 0.1)" // green-500 with 10% opacity
+                        ? "rgba(34, 197, 94, 0.08)"
                         : problem.difficulty === "Medium"
-                        ? "rgba(234, 179, 8, 0.1)" // yellow-500
-                        : "rgba(239, 68, 68, 0.1)", // red-500
+                        ? "rgba(234, 179, 8, 0.08)"
+                        : "rgba(239, 68, 68, 0.08)",
                     color:
                       problem.difficulty === "Easy"
                         ? "rgb(34, 197, 94)"
@@ -374,24 +499,24 @@ const getAIReview = async () => {
                 </span>
               </div>
               <p
-                className="mb-4 text-gray-300"
+                className="mb-4 text-cyan-100/90"
                 style={{ whiteSpace: "pre-wrap" }}
               >
                 {problem.description}
               </p>
-              <h3 className="text-lg font-semibold mb-2">Constraints</h3>
-              <ul className="list-disc list-inside text-gray-400 mb-4">
+              <h3 className="text-lg font-semibold mb-2 text-cyan-300">Constraints</h3>
+              <ul className="list-disc list-inside text-cyan-200/80 mb-4">
                 {problem.constraints?.split("\n").map((c, i) => (
                   <li key={i}>{c}</li>
                 ))}
               </ul>
-              <h3 className="text-lg font-semibold mb-2">Examples</h3>
+              <h3 className="text-lg font-semibold mb-2 text-cyan-300">Examples</h3>
               {problem.testCases
                 ?.filter((tc) => !tc.hidden)
                 .map((tc, i) => (
                   <div
                     key={i}
-                    className="mb-3 p-3 bg-[#2b2b2b] rounded text-sm text-green-300"
+                    className="mb-3 p-3 bg-cyan-300/10 rounded text-sm text-cyan-100 border border-cyan-300/20"
                   >
                     <p style={{ whiteSpace: "pre-wrap" }}>
                       <strong>Input:</strong>
@@ -414,32 +539,34 @@ const getAIReview = async () => {
           )}
 
           {activeTab === "submissions" && (
-            <div className="text-sm text-gray-300">
+            <div className="text-sm text-cyan-100">
               {submissions.length === 0 ? (
                 <p>No submissions yet.</p>
               ) : (
-                <table className="w-full mt-4 text-left text-sm rounded overflow-hidden shadow border border-gray-700">
-                  <thead className="bg-gray-800 text-gray-300 uppercase tracking-wider text-xs">
+                <table className="w-full mt-4 text-left text-sm rounded-2xl overflow-hidden shadow-2xl border border-cyan-300/30 bg-[#101624]/80 backdrop-blur-xl">
+                  <thead className="bg-cyan-300/10 text-cyan-300 uppercase tracking-wider text-xs">
                     <tr>
                       <th className="px-4 py-3">No.</th>
                       <th className="px-4 py-3">Language</th>
+                      <th className="p-4 font-bold">Verdict</th>
                       <th className="px-4 py-3">Time</th>
                       <th className="px-4 py-3">Code</th>
                     </tr>
                   </thead>
-                  <tbody className="text-white bg-gray-900">
+                  <tbody className="text-cyan-100">
                     {submissions.map((sub, idx) => (
                       <tr
                         key={sub._id}
-                        className="hover:bg-gray-800 transition duration-150 border-t border-gray-700"
+                        className="hover:bg-cyan-300/10 transition duration-150 border-t border-cyan-300/20"
                       >
-                        <td className="px-4 py-3">{idx + 1}</td>
+                        <td className="px-4 py-3 font-semibold">{idx + 1}</td>
                         <td className="px-4 py-3 capitalize">{sub.language}</td>
                         <td className="px-4 py-3">
                           {dayjs(sub.timestamp)
                             .tz("Asia/Kolkata")
                             .format("DD-MM-YYYY HH:mm:ss")}
                         </td>
+                        
 
                         <td className="px-4 py-3">
                           <button
@@ -447,7 +574,7 @@ const getAIReview = async () => {
                               setModalCode(sub.code);
                               setShowModal(true);
                             }}
-                            className="text-blue-400 hover:text-blue-300 hover:underline"
+                            className="text-cyan-300 hover:text-cyan-100 hover:underline font-semibold"
                           >
                             View Code
                           </button>
@@ -474,8 +601,8 @@ const getAIReview = async () => {
   style={{ flex: 1, minHeight: 0 }}
 >
 
-          <div className="flex flex-col h-full p-4 bg-[#1a1a1a] rounded shadow">
-            <div className="flex-none p-2 flex justify-between items-centerr">
+          <div className="flex flex-col h-full p-4 bg-[#101624]/80 rounded-2xl shadow-2xl border border-cyan-300/30">
+            <div className="flex-none p-2 flex justify-between items-center">
               <select
                 className="bg-gray-800 text-white px-4 py-2 rounded"
                 value={language}
@@ -486,45 +613,62 @@ const getAIReview = async () => {
                 <option value="python">Python</option>
                 <option value="java">Java</option>
               </select>
+              <div className="flex-1 flex items-center justify-center">
+                {isRunning && (
+                  <span className="text-blue-400 font-semibold animate-pulse">Running code...</span>
+                )}
+                {isSubmitting && (
+                  <span className="text-green-400 font-semibold animate-pulse">Submitting code...</span>
+                )}
+              </div>
               <div className="flex items-center gap-2">
                 {/* Run Button */}
                 <button
                   onClick={runCode}
-                  className="px-4 py-2 rounded-md text-white font-medium shadow transition 
-               bg-gradient-to-tr from-blue-500 to-cyan-500 hover:opacity-90 hover:scale-[1.02]"
+                  className="px-6 py-2 rounded-lg text-white font-semibold shadow transition 
+                    bg-gradient-to-tr from-blue-700 via-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-300 hover:scale-105 border border-blue-500/30"
+                  disabled={isRunning || isSubmitting}
                 >
-                  ▶ Run
+                  Run
                 </button>
-
-                {/* Submit Button (Improved icon) */}
-                <button
-                  onClick={submitCode}
-                  className="px-4 py-2 rounded-md text-white font-medium shadow transition 
-               bg-gradient-to-tr from-green-500 to-emerald-400 hover:opacity-90 hover:scale-[1.02]"
-                >
-                  📤 Submit
-                </button>
-
-                {/* TC & SC Brain Button */}
-                {finalVerdict === "Accepted" && (
+                {/* Submission/AI Buttons Row - removed mt-4 for alignment */}
+                <div className="flex gap-2 items-center">
                   <button
-                    onClick={getComplexity}
-                    title="Analyze Time & Space Complexity"
-                    className="p-2 rounded-full shadow bg-gradient-to-tr from-purple-600 to-pink-500 hover:opacity-90 hover:scale-105 transition flex items-center justify-center"
+                    onClick={submitCode}
+                    className="px-6 py-2 rounded-lg text-white font-semibold shadow transition 
+                      bg-gradient-to-tr from-green-700 via-green-500 to-emerald-400 hover:from-green-600 hover:to-emerald-300 hover:scale-105 border border-green-500/30"
+                    disabled={isRunning || isSubmitting}
                   >
-                    <span
-                      role="img"
-                      aria-label="complexity"
-                      className="text-lg"
-                    >
-                      🧠
-                    </span>
+                    Submit
                   </button>
-                )}
+                  {/* Show only one of the two buttons: complexity or edge cases */}
+                  {finalVerdict === "Accepted" && (
+                    <button
+                      onClick={getComplexity}
+                      title="Analyze Time & Space Complexity"
+                      className="p-2 rounded-full shadow bg-gradient-to-tr from-purple-600 to-pink-500 hover:opacity-90 hover:scale-105 transition flex items-center justify-center"
+                      aria-label="complexity"
+                      disabled={isRunning || isSubmitting}
+                    >
+                      <span className="text-lg">🧠</span>
+                    </button>
+                  )}
+                  {showEdgeCasesButton && !finalVerdict && (
+                    <button
+                      onClick={handleShowEdgeCases}
+                      title="Show Possible Edge Cases"
+                      className="p-2 rounded-full shadow bg-gradient-to-tr from-yellow-500 to-yellow-700 hover:opacity-90 hover:scale-105 transition flex items-center justify-center"
+                      aria-label="edge-cases"
+                      disabled={loadingEdgeCases || isRunning || isSubmitting}
+                    >
+                      <span className="text-lg">🧩</span>
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="flex-1 min-h-0 overflow-hidden p-2 bg-[#1a1a1a] rounded shadow mt-2">
+            <div className="flex-1 min-h-0 overflow-hidden p-2 bg-[#101624] rounded-xl shadow mt-2 border border-cyan-300/20">
               <div className="h-full overflow-auto">
                 <CodeMirror
                   value={code}
@@ -543,23 +687,23 @@ const getAIReview = async () => {
               </div>
             </div>
             {loadingComplexity && (
-              <p className="text-blue-400 mt-3 animate-pulse">
+              <p className="text-cyan-300 mt-3 animate-pulse">
                 Analyzing complexity...
               </p>
             )}
           </div>
 
-          <div className="bg-[#1a1a1a] h-full p-4 shadow m-4 rounded overflow-y-auto max-h-[calc(100vh-120px)]">
+          <div className="bg-[#101624]/80 h-full p-4 shadow m-4 rounded-2xl border border-cyan-300/30 overflow-y-auto max-h-[calc(100vh-120px)]">
 
-            <h3 className="text-lg font-semibold mb-2">🧪 Test Cases</h3>
+            <h3 className="text-lg font-semibold mb-2 text-cyan-300"> Test Cases</h3>
 
             {finalVerdict === "Accepted" ? (
-              <div className="bg-[#222] p-6 rounded shadow-md border border-green-700/30">
+              <div className="bg-cyan-300/10 p-6 rounded shadow-md border border-green-700/30">
                 <h2 className="text-green-400 text-xl font-semibold mb-4">
                   ✅ Result: Accepted
                 </h2>
-                <div className="text-sm text-gray-400 mb-3">
-                  Total Passed:{" "}
+                <div className="text-sm text-cyan-200 mb-3">
+                  Total Passed: {" "}
                   <span className="text-green-300">
                     {problem.testCases?.length}
                   </span>
@@ -568,7 +712,7 @@ const getAIReview = async () => {
                   {problem.testCases?.map((_, idx) => (
                     <div
                       key={idx}
-                      className="bg-green-600/20 text-green-300 px-4 py-2 rounded shadow-sm text-sm font-medium"
+                      className="bg-green-600/20 text-green-300 px-4 py-2 rounded shadow-sm text-sm font-medium border border-green-300/30"
                     >
                       Test Case {idx + 1}
                     </div>
@@ -579,7 +723,7 @@ const getAIReview = async () => {
                     {!aiReview && (
 <button
   onClick={getAIReview}
-  className="bg-gradient-to-tr from-purple-600 to-pink-500 mt-3 hover:from-purple-500 hover:to-pink-400 text-white px-4 py-2 rounded shadow-md text-sm font-semibold transition transform hover:scale-[1.02]"
+  className="bg-gradient-to-tr from-cyan-400 to-cyan-300 mt-3 hover:from-cyan-300 hover:to-cyan-200 text-cyan-900 px-4 py-2 rounded shadow-md text-sm font-semibold transition transform hover:scale-[1.02] border border-cyan-300/40"
 >
   <span className="mr-1 animate-pulse">🧠</span> Review Code
 </button>
@@ -606,22 +750,22 @@ const getAIReview = async () => {
   <ReactMarkdown
     components={{
       p: ({ children }) => (
-        <p className="text-gray-300 leading-relaxed mb-3">{children}</p>
+        <p className="text-cyan-100 leading-relaxed mb-3">{children}</p>
       ),
       li: ({ children }) => (
-        <li className="text-gray-300 list-disc ml-6 mb-2">{children}</li>
+        <li className="text-cyan-100 list-disc ml-6 mb-2">{children}</li>
       ),
       h1: ({ children }) => (
-        <h1 className="text-2xl font-bold text-white mb-3 mt-4 border-b border-gray-600 pb-1">{children}</h1>
+        <h1 className="text-2xl font-bold text-cyan-100 mb-3 mt-4 border-b border-cyan-300 pb-1">{children}</h1>
       ),
       h2: ({ children }) => (
-        <h2 className="text-lg font-semibold text-white mt-4 mb-2 underline decoration-purple-600">{children}</h2>
+        <h2 className="text-lg font-semibold text-cyan-100 mt-4 mb-2 underline decoration-cyan-300">{children}</h2>
       ),
       code: ({ children }) => (
-        <code className="bg-[#2b2b2b] px-1 py-0.5 rounded text-green-400 text-sm font-mono">{children}</code>
+        <code className="bg-[#101624] px-1 py-0.5 rounded text-cyan-300 text-sm font-mono border border-cyan-300/20">{children}</code>
       ),
       pre: ({ children }) => (
-        <pre className="bg-[#2a2a2a] p-3 rounded-lg overflow-auto text-sm text-white font-mono mb-3">
+        <pre className="bg-[#101624] p-3 rounded-lg overflow-auto text-sm text-cyan-100 font-mono mb-3 border border-cyan-300/20">
           {children}
         </pre>
       ),
@@ -642,10 +786,10 @@ const getAIReview = async () => {
                     <div
                       key={idx}
                       onClick={() => setSelectedCase(idx)}
-                      className={`relative px-3 py-1.5 rounded cursor-pointer text-sm ${
+                      className={`relative px-3 py-1.5 rounded cursor-pointer text-sm border border-cyan-300/20 transition-all duration-150 font-semibold ${
                         idx === selectedCase
-                          ? "bg-gray-700 text-white"
-                          : "bg-[#333] text-gray-300 hover:bg-[#444]"
+                          ? "bg-cyan-300/20 text-cyan-100 border-cyan-300"
+                          : "bg-[#101624] text-cyan-200 hover:bg-cyan-300/10"
                       }`}
                     >
                       Case {idx + 1}
@@ -669,7 +813,7 @@ const getAIReview = async () => {
                   ))}
                   <button
                     onClick={() => setShowAddInput(true)}
-                    className="px-3 py-1.5 text-sm bg-gray-600 hover:bg-gray-500 text-white rounded"
+                    className="px-3 py-1.5 text-sm bg-cyan-300/20 hover:bg-cyan-300/30 text-cyan-100 rounded border border-cyan-300/20"
                   >
                     ➕ Add Testcase
                   </button>
@@ -677,16 +821,16 @@ const getAIReview = async () => {
 
                 {/* New Testcase Input */}
                 {showAddInput ? (
-                  <div className="bg-[#2a2a2a] p-4 rounded mb-4 space-y-3 border border-gray-600">
+                  <div className="bg-[#101624] p-4 rounded mb-4 space-y-3 border border-cyan-300/20">
                     <textarea
-                      className="w-full bg-[#121212] text-white border border-gray-600 p-3 rounded text-sm shadow-sm"
+                      className="w-full bg-[#101624] text-cyan-100 border border-cyan-300/20 p-3 rounded text-sm shadow-sm"
                       rows="1"
                       placeholder="Enter custom input..."
                       value={newInput}
                       onChange={(e) => setNewInput(e.target.value)}
                     />
                     <textarea
-                      className="w-full bg-[#121212] text-white border border-gray-600 p-3 rounded text-sm shadow-sm"
+                      className="w-full bg-[#101624] text-cyan-100 border border-cyan-300/20 p-3 rounded text-sm shadow-sm"
                       rows="1"
                       placeholder="Enter expected output..."
                       value={newOutput}
@@ -709,7 +853,7 @@ const getAIReview = async () => {
                             setSelectedCase(allInputs.length); // select new one
                           }
                         }}
-                        className="bg-green-600 hover:bg-green-500 px-4 py-1 rounded text-sm"
+                        className="bg-cyan-300/30 hover:bg-cyan-300/50 px-4 py-1 rounded text-sm text-cyan-100 border border-cyan-300/20"
                       >
                         OK
                       </button>
@@ -719,7 +863,7 @@ const getAIReview = async () => {
                           setNewOutput("");
                           setShowAddInput(false);
                         }}
-                        className="bg-red-600 hover:bg-red-500 px-4 py-1 rounded text-sm"
+                        className="bg-red-600/30 hover:bg-red-600/50 px-4 py-1 rounded text-sm text-cyan-100 border border-red-400/20"
                       >
                         Cancel
                       </button>
@@ -727,16 +871,15 @@ const getAIReview = async () => {
                   </div>
                 ) : (
                   // Show only selected test case when not adding
-                  <div className="bg-[#2a2a2a] rounded p-4 mt-4 border border-gray-700 shadow-sm text-sm text-green-300">
+                  <div className="bg-[#101624] rounded p-4 mt-4 border border-cyan-300/20 shadow-sm text-sm text-cyan-100">
                     <p style={{ whiteSpace: "pre-wrap" }}>
                       <strong>Input:</strong>
                       <br />
                       {allInputs[selectedCase]?.input ||
                         allInputs[selectedCase]}
                     </p>
-                    <p className="mt-2 text-blue-300">
-                      <strong>Output:</strong>{" "}
-                      {outputs[selectedCase] ?? "Run to see output"}
+                    <p className="mt-2 text-cyan-300">
+                      <strong>Output:</strong> {outputs[selectedCase] ?? "Run to see output"}
                     </p>
                     {verdicts[selectedCase] && (
                       <p
@@ -753,6 +896,7 @@ const getAIReview = async () => {
                 )}
               </>
             )}
+            
           </div>
         </Split>
       </Split>
@@ -814,8 +958,40 @@ const getAIReview = async () => {
                     .split(/(?<=\.)\s+/)
                     .map((point, idx) => (
                       <li key={idx}>{point}</li>
-                    ))} 
+                    ))}
                 </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Edge Cases Modal */}
+      {showEdgeCasesModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+          <div className="bg-[#1a1a1a] transition-transform duration-300 scale-100 text-white w-[90%] md:w-[60%] p-6 rounded-lg shadow-lg border border-yellow-700 relative">
+            <button
+              onClick={() => setShowEdgeCasesModal(false)}
+              className="absolute top-3 right-4 text-red-400 hover:text-red-600 text-xl font-bold"
+            >
+              &times;
+            </button>
+            <div className="flex items-center mb-4 space-x-2">
+              <span className="text-xl">🧩</span>
+              <h2 className="text-lg font-semibold text-yellow-400">
+                Possible Edge Cases
+              </h2>
+            </div>
+            <div className="space-y-4 text-sm text-gray-300">
+              <div className="bg-[#2a2a2a] p-4 rounded border border-yellow-500/30 shadow-sm">
+                {loadingEdgeCases ? (
+                  <div className="text-yellow-200">Generating edge cases...</div>
+                ) : edgeCases && edgeCases.trim() ? (
+                  <div className="prose prose-invert max-w-none text-yellow-100">
+                    <ReactMarkdown>{'\n- First\n- Second\n- Third'}</ReactMarkdown>
+                  </div>
+                ) : (
+                  <div className="text-yellow-200">No edge cases found or failed to fetch edge cases.</div>
+                )}
               </div>
             </div>
           </div>
