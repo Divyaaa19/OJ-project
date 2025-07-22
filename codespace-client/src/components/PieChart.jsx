@@ -1,48 +1,81 @@
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import React from 'react';
+
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const PieChart = ({ solved, total }) => {
+  const unsolved = Math.max(0, total - solved);
   const percent = total > 0 ? Math.round((solved / total) * 100) : 0;
+
   const data = {
     labels: ['Solved', 'Unsolved'],
-    datasets: [{
-      data: [solved, total - solved],
-      backgroundColor: [
-        '#10B981', // green-500
-        '#EF4444', // red-500
-      ],
-      borderWidth: 0,
-      hoverOffset: 8,
-      borderRadius: 8,
-    }]
+    datasets: [
+      {
+        data: [solved, unsolved],
+        backgroundColor: [
+          'rgba(16, 185, 129, 0.85)', // emerald-500
+          'rgba(239, 68, 68, 0.65)',  // red-500
+        ],
+        borderColor: [
+          'rgba(16, 185, 129, 1)',
+          'rgba(239, 68, 68, 1)',
+        ],
+        borderWidth: 3,
+        hoverOffset: 8,
+        cutout: '70%',
+      },
+    ],
   };
 
   const options = {
     plugins: {
-      legend: { display: false },
+      legend: {
+        display: false,
+      },
       tooltip: {
-        backgroundColor: '#1e293b',
-        titleColor: '#10B981',
+        enabled: true,
+        backgroundColor: '#232946',
+        titleColor: '#fff',
         bodyColor: '#fff',
-        borderColor: '#10B981',
+        borderColor: '#3b82f6',
         borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
+        xAlign: 'right', // show tooltip outward to the right
+        yAlign: 'center',
+        callbacks: {
+          label: function(context) {
+            const label = context.label || '';
+            const value = context.parsed || 0;
+            return `${label}: ${value}`;
+          }
+        },
       },
     },
     animation: {
       animateRotate: true,
       duration: 1200,
-      easing: 'easeInOutQuart',
+      easing: 'easeOutQuart',
     },
-    cutout: '65%',
-    layout: { padding: 0 },
+    cutout: '70%',
+    responsive: true,
+    maintainAspectRatio: false,
   };
 
   return (
-    <div className="w-full h-full flex items-center justify-center relative">
-      <Pie data={data} options={options} />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-2xl font-extrabold text-green-400 drop-shadow-lg">{percent}%</span>
+    <div className="relative w-full h-full flex items-center justify-center">
+      <Pie data={data} options={options} width={140} height={140} />
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+        <span className="text-base font-bold text-emerald-400 drop-shadow-glow">
+          {percent}%
+        </span>
+        <span className="text-[10px] text-gray-300 font-semibold mt-0.5 tracking-wide">
+          Solved
+        </span>
+        <span className="text-[10px] text-blue-200 mt-0.5">
+          {solved} / {total}
+        </span>
       </div>
     </div>
   );

@@ -4,6 +4,9 @@ const Problem = require("../models/Problem");
 const verifyAdmin = require("../middleware/verifyAdmin");
 
 const User = require("../models/User");
+const { AdminSubmission } = require("../models/Submission");
+const axios = require("axios");
+
 // Admin stats route
 router.get("/stats", verifyAdmin, async (req, res) => {
   try {
@@ -62,6 +65,70 @@ router.delete("/problems/:id", verifyAdmin, async (req, res) => {
     res.json({ message: "Problem deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: "Delete failed" });
+  }
+});
+
+// POST /api/admin/test-solution
+router.post("/test-solution", verifyAdmin, async (req, res) => {
+  const { code, language, testCases, problemTitle } = req.body;
+  const adminId = req.user.id;
+  const results = [];
+  let allAccepted = true;
+
+  for (const tc of testCases) {
+    try {
+      const runRes = await axios.post("http://localhost:8000/run", {
+        language,
+        code,
+        input: tc.input,
+      });
+      const output = (runRes.data.output || "").trim().replace(/\s+/g, " ");
+      const expected = (tc.output || "").trim().replace(/\s+/g, " ");
+      let verdict = "";
+      if (/time limit exceeded/i.test(output)) {
+        verdict = "TLE";
+        allAccepted = false;
+      } else if (/memory limit exceeded/i.test(output)) {
+        verdict = "MLE";
+        allAccepted = false;
+      } else if (output === expected) {
+        verdict = "Accepted";
+      } else {
+        verdict = "Wrong Answer";
+        allAccepted = false;
+      }
+      results.push({ input: tc.input, expected, output, verdict });
+    } catch (err) {
+      results.push({ input: tc.input, expected: tc.output, output: "Error", verdict: "Error" });
+      allAccepted = false;
+    }
+  }
+
+  const verdict = allAccepted ? "Accepted" : "Wrong Answer";
+
+  // Save admin submission
+  await AdminSubmission.create({
+    adminId,
+    problemId: null, // Not yet saved, or you can pass if available
+    problemTitle,
+    code,
+    language,
+    timestamp: new Date(),
+    verdict,
+    results,
+  });
+
+  res.json({ verdict, results });
+});
+
+// GET /api/admin/submissions
+router.get("/submissions", verifyAdmin, async (req, res) => {
+  const adminId = req.user.id;
+  try {
+    const submissions = await AdminSubmission.find({ adminId }).sort({ timestamp: -1 });
+    res.json(submissions);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch admin submissions" });
   }
 });
 

@@ -10,7 +10,7 @@ export default function Sidebar({
   setActiveTab,
   collapsed,
   toggleCollapse,
-  userName,
+  userData,
 }) {
   const navigate = useNavigate();
 
@@ -19,64 +19,75 @@ export default function Sidebar({
     navigate("/");
   };
 
-  const getTimeGreeting = () => {
+  // Helper to get time-based greeting
+  function getTimeGreeting() {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
-    if (hour < 18) return "Good afternoon";
-    return "Good evening";
-  };
+    if (hour < 17) return "Good afternoon";
+    if (hour < 21) return "Good evening";
+    return "Good night";
+  }
 
   return (
     <div
-      className={`h-screen bg-gradient-to-b from-gray-900 via-blue-950 to-black text-white ${
+      className={`h-screen fixed top-0 left-0 z-30 bg-gray-900 shadow-2xl ${
         collapsed ? "w-16" : "w-64"
-      } transition-all duration-300 flex flex-col justify-between p-4 relative shadow-2xl`}
+      } transition-all duration-300 flex flex-col justify-between py-6 px-2 relative overflow-hidden`}
     >
+      {/* Toggle Menu Row */}
+      <div
+        className={`flex items-center w-full ${
+          collapsed ? "justify-center" : "justify-between"
+        } relative`}
+        style={{ minHeight: "56px" }}
+      >
+        {/* Toggle Button */}
+        <button
+          onClick={toggleCollapse}
+          className={`${
+            collapsed ? "ml-0" : "ml-auto"
+          } bg-gray-800/80 p-2 rounded-lg shadow-lg hover:bg-gray-700/80 transition-all duration-200 border border-gray-700 hover:border-gray-600`}
+          aria-label="Toggle sidebar"
+          style={{
+            zIndex: 10,
+            position: "relative",
+          }}
+        >
+          <HiOutlineMenuAlt3 className="text-gray-300 text-xl" />
+        </button>
+      </div>
+
       {/* Top Section */}
       <div className="flex-1 flex flex-col">
-        {/* Top Bar: Greeting + Toggle */}
-        <div
-          className={`flex items-center justify-between mb-4 ${
-            collapsed ? "flex-col gap-2" : ""
-          }`}
-        >
-          {!collapsed && (
-            <div className="text-sm font-medium text-blue-300 whitespace-nowrap">
-              {getTimeGreeting()}, {userName}!
-            </div>
-          )}
-          <button
-            onClick={toggleCollapse}
-            className="bg-gray-800 p-2 rounded hover:bg-gray-700"
-          >
-            <HiOutlineMenuAlt3 className="text-white text-xl" />
-          </button>
-        </div>
-
-        {/* Dashboard Title */}
+        {/* Greeting */}
+        {!collapsed && userData && userData.name && (
+          <div className="mt-6 mb-2 flex flex-col items-center">
+            <span className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 via-cyan-300 to-purple-300 drop-shadow tracking-tight">
+              {getTimeGreeting()}, {userData.name}!
+            </span>
+          </div>
+        )}
+        {/* Title */}
         {!collapsed && (
-          <h2 className="text-2xl font-bold mb-4 text-center tracking-wide text-blue-300 drop-shadow">
-            Dashboard
-          </h2>
+          <div className="mt-2 mb-6 flex flex-col items-center">
+            <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400 drop-shadow-[0_2px_24px_rgba(56,189,248,0.25)] tracking-tight text-center transition-all duration-500">
+              Dashboard
+            </h2>
+            <div className="w-2/3 h-1 bg-gradient-to-r from-blue-400/40 via-cyan-300/30 to-purple-400/40 blur-sm rounded-full mt-2"></div>
+          </div>
         )}
 
-        {/* Pie Chart */}
+        {/* Pie Chart (expanded only) */}
         {!collapsed && (
-          <div className="h-44 flex items-center justify-center w-full mb-8">
-            <div className="relative w-32 h-32 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500/30 via-blue-400/10 to-fuchsia-400/10 blur-2xl animate-pulse z-0" />
+          <div className="w-full flex justify-center items-center mb-8">
+            <div className="w-32 h-32 flex items-center justify-center">
               <PieChart solved={solved} total={total} />
-              <div className="absolute inset-0 rounded-full border-4 border-blue-400/60 animate-glow pointer-events-none" />
             </div>
           </div>
         )}
 
         {/* Tabs */}
-        <nav
-          className={`space-y-2 w-full flex flex-col items-center ${
-            collapsed ? "mt-2" : "mt-6"
-          }`}
-        >
+        <nav className="space-y-2 w-full flex mt-6 flex-col items-center">
           <SidebarTab
             label="Problems"
             icon={<FaTachometerAlt />}
@@ -106,10 +117,14 @@ export default function Sidebar({
         onClick={handleLogout}
         className={`flex items-center ${
           collapsed ? "justify-center" : "justify-start"
-        } gap-2 px-3 py-3 rounded-2xl mt-4 bg-gradient-to-br from-red-900/30 to-red-700/10 border border-red-600/40 hover:bg-red-600/40 hover:border-red-600 transition-all duration-200`}
+        } gap-2 px-3 py-3 rounded-lg mb-2 bg-gray-800/80 hover:bg-gray-700/80 border border-gray-700 hover:border-gray-600 shadow transition-all duration-200`}
       >
-        <HiOutlineLogout className="text-2xl min-w-[24px]" />
-        {!collapsed && <span className="text-white text-sm">Logout</span>}
+        <HiOutlineLogout className="text-xl min-w-[20px] text-gray-300" />
+        {!collapsed && (
+          <span className="text-gray-300 text-sm font-medium">
+            Logout
+          </span>
+        )}
       </button>
     </div>
   );
@@ -119,12 +134,34 @@ function SidebarTab({ label, icon, active, onClick, collapsed }) {
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-3 w-full px-3 py-2 rounded ${
-        active ? "bg-gray-800 text-blue-400" : "hover:text-blue-300"
-      } transition-all duration-200`}
+      className={`flex items-center gap-3 w-full px-3 py-2 rounded-xl font-semibold transition-all duration-200
+        ${
+          active
+            ? "bg-gradient-to-r from-blue-900/60 via-gray-900/60 to-purple-900/60 text-blue-300 shadow-lg"
+            : "hover:bg-gradient-to-r hover:from-blue-900/30 hover:to-purple-900/30 hover:text-blue-200 text-gray-200"
+        }
+        ${collapsed ? "justify-center" : ""}
+      `}
+      style={{
+        minHeight: "44px",
+      }}
     >
-      <span className="text-lg">{icon}</span>
-      {!collapsed && <span>{label}</span>}
+      <span
+        className={`text-lg ${
+          active ? "text-blue-300" : "text-blue-200"
+        } transition-all duration-200`}
+      >
+        {icon}
+      </span>
+      {!collapsed && (
+        <span
+          className={`${
+            active ? "text-blue-200" : "text-gray-200"
+          } text-base transition-all duration-200`}
+        >
+          {label}
+        </span>
+      )}
     </button>
   );
 }

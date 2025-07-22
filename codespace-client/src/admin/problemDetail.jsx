@@ -33,24 +33,49 @@ export default function ProblemDetail() {
       </div>
 
       {/* Description */}
-      <section className="bg-gray-900 rounded-lg p-6 mb-6 shadow">
-        <h2 className="text-xl font-semibold text-yellow-300 mb-2">📝 Description</h2>
-        <p className="text-gray-200 leading-relaxed whitespace-pre-wrap">{problem.description}</p>
+      <section className="bg-gradient-to-br from-[#232946]/90 via-gray-900/90 to-gray-800/90 rounded-3xl shadow-2xl border border-blue-700/40 p-8 mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-blue-500/20 rounded-lg">
+            <span className="text-2xl">📝</span>
+          </div>
+          <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+            Problem Description
+          </h2>
+        </div>
+        <div className="text-gray-200 text-base leading-relaxed bg-[#20243a] rounded-xl p-5 border border-blue-900/20" style={{ whiteSpace: 'pre-wrap' }}>
+          {problem.description}
+        </div>
       </section>
 
       {/* Constraints */}
       {problem.constraints && (
-        <section className="bg-gray-900 rounded-lg p-6 mb-6 shadow">
-          <h2 className="text-xl font-semibold text-yellow-300 mb-2">📏 Constraints</h2>
-          <p className="text-gray-200 whitespace-pre-wrap leading-relaxed">{problem.constraints}</p>
+        <section className="bg-gradient-to-br from-[#232946]/90 via-gray-900/90 to-gray-800/90 rounded-3xl shadow-2xl border border-purple-700/40 p-8 mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-purple-500/20 rounded-lg">
+              <span className="text-2xl">📏</span>
+            </div>
+            <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+              Constraints
+            </h2>
+          </div>
+          <div className="text-gray-200 text-base leading-relaxed bg-[#20243a] rounded-xl p-5 border border-purple-900/20" style={{ whiteSpace: 'pre-wrap' }}>
+            {problem.constraints}
+          </div>
         </section>
       )}
 
       {/* Test Cases */}
-      <section className="bg-gray-900 rounded-lg p-6 shadow">
-        <h2 className="text-xl font-semibold text-yellow-300 mb-4">🧪 Test Cases</h2>
+      <section className="bg-gradient-to-br from-[#232946]/90 via-gray-900/90 to-gray-800/90 rounded-3xl shadow-2xl border border-green-700/40 p-8 mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-green-500/20 rounded-lg">
+            <span className="text-2xl">🧪</span>
+          </div>
+          <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">
+            Test Cases
+          </h2>
+        </div>
         {problem.testCases.length === 0 && (
-          <p className="text-gray-500 italic">No test cases available.</p>
+          <div className="text-gray-500 italic">No test cases available.</div>
         )}
         {problem.testCases.map((tc, idx) => (
           <div key={idx} className="mb-6 border-b border-gray-800 pb-4">
@@ -64,12 +89,11 @@ export default function ProblemDetail() {
               <pre className="bg-gray-800 p-3 rounded text-green-300 font-mono whitespace-pre-wrap">{tc.output}</pre>
             </div>
             {tc.explanation && (
-  <div className="mt-2">
-    <p className="text-gray-300">🧠 <strong>Explanation:</strong></p>
-    <pre className="bg-gray-800 p-3 rounded text-gray-200 font-mono whitespace-pre-wrap">{tc.explanation}</pre>
-  </div>
-)}
-
+              <div className="mt-2">
+                <p className="text-gray-300">🧠 <strong>Explanation:</strong></p>
+                <pre className="bg-gray-800 p-3 rounded text-gray-200 font-mono whitespace-pre-wrap">{tc.explanation}</pre>
+              </div>
+            )}
           </div>
         ))}
       </section>

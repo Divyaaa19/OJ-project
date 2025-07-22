@@ -1,4 +1,4 @@
-const { exec } = require("child_process");
+const { exec, spawn } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
@@ -6,28 +6,42 @@ const outputPath = path.join(__dirname, "outputs");
 if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath, { recursive: true });
 
 const executeC = (filepath, inputFilePath) => {
-  const jobId = path.basename(filepath).split(".")[0];
+  const jobId = path.basename(filepath, path.extname(filepath));
   const outPath = path.join(outputPath, `${jobId}.exe`);
 
   return new Promise((resolve, reject) => {
-    const command = `gcc ${filepath} -o ${outPath} && ${outPath} < ${inputFilePath}`;
-    exec(command, { timeout: 2000 }, (error, stdout, stderr) => {
-      if (error) {
-        if (error.killed && error.signal === 'SIGKILL') {
-          return resolve("Memory Limit Exceeded");
-        }
-        if (error.killed || error.signal === 'SIGTERM' || error.code === null) {
+    // Compile step
+    const compileCmd = `gcc "${filepath}" -o "${outPath}"`;
+    exec(compileCmd, (compileErr, stdout, stderr) => {
+      if (compileErr) {
+        return reject({ error: compileErr, stderr });
+      }
+      // Run step
+      const inputStream = fs.createReadStream(inputFilePath);
+      const runProc = spawn(outPath, [], { stdio: ["pipe", "pipe", "pipe"] });
+
+      let output = "";
+      let errorOutput = "";
+
+      runProc.stdout.on("data", (data) => {
+        output += data.toString();
+      });
+      runProc.stderr.on("data", (data) => {
+        errorOutput += data.toString();
+      });
+
+      runProc.on("close", (code, signal) => {
+        if (signal === "SIGTERM" || signal === "SIGKILL") {
           return resolve("Time Limit Exceeded");
         }
-        if (stderr && /cannot allocate memory|memoryerror/i.test(stderr)) {
+        if (errorOutput && /cannot allocate memory|memoryerror/i.test(errorOutput)) {
           return resolve("Memory Limit Exceeded");
         }
-        return reject({ error, stderr });
-      }
-      if (stderr && /cannot allocate memory|memoryerror/i.test(stderr)) {
-        return resolve("Memory Limit Exceeded");
-      }
-      resolve(stdout);
+        resolve(output);
+      });
+
+      // Pipe input file to the process
+      inputStream.pipe(runProc.stdin);
     });
   });
 };

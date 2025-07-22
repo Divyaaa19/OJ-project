@@ -208,7 +208,12 @@ router.patch("/favorite/:problemId", verifyUser, async (req, res) => {
 router.get("/user-problems/:id", verifyUser, async (req, res) => {
   const problem = await Problem.findById(req.params.id);
   if (!problem) return res.status(404).json({ message: "Problem not found" });
-  res.json(problem);
+  // Only send non-hidden test cases to the frontend
+  const filteredProblem = problem.toObject();
+  if (filteredProblem.testCases) {
+    filteredProblem.testCases = filteredProblem.testCases.filter(tc => !tc.hidden);
+  }
+  res.json(filteredProblem);
 });
 
 // Get solve dates for streak calculation
