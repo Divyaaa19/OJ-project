@@ -7,6 +7,7 @@ const Submission = require("../models/Submission");
 const UserProblem = require("../models/UserProblem");
 const mongoose=require("mongoose")
 const bcrypt = require("bcrypt");
+const axios = require("axios"); // Ensure this is at the top
 
 router.get("/profile", verifyUser, async (req, res) => {
   try {
@@ -140,19 +141,61 @@ router.get("/dashboard", verifyUser, async (req, res) => {
 
 // routes/user.js
 router.post('/submit', verifyUser, async (req, res) => {
-  const { problemId, code, language, timestamp, verdict } = req.body;
+  const { problemId, code, language } = req.body;
   const userId = req.user.id;
 
+  const problem = await Problem.findById(problemId);
+  if (!problem) return res.status(404).json({ message: "Problem not found" });
+
+  // Get all test cases (including hidden)
+  const allCases = problem.testCases;
+
+  let verdicts = [];
+  let allPassed = true;
+  for (const tc of allCases) {
+    try {
+      const runRes = await axios.post("http://localhost:8000/run", {
+        language,
+        code,
+        input: tc.input.trim(),
+      });
+      const output = (runRes.data.output || "").trim().replace(/\s+/g, " ");
+      const expected = (tc.output || "").trim().replace(/\s+/g, " ");
+      let verdict = "";
+      if (/time limit exceeded/i.test(output)) {
+        verdict = "TLE";
+      } else if (/memory limit exceeded/i.test(output)) {
+        verdict = "MLE";
+      } else if (output === expected) {
+        verdict = "Accepted";
+      } else {
+        verdict = "Wrong Answer";
+        allPassed = false;
+      }
+      verdicts.push(verdict);
+    } catch (err) {
+      verdicts.push("Error");
+      allPassed = false;
+    }
+  }
+
+  // Save the submission (optional, as before)
   await Submission.create({
     userId,
     problemId,
     code,
     language,
     timestamp: new Date(),
-    verdict: verdict || "Pending",
+    verdict: allPassed ? "Accepted" : "Wrong Answer",
   });
 
-  res.json({ message: "Submission saved" });
+  // Respond with verdicts only (no test case data)
+  res.json({
+    totalCases: allCases.length,
+    passedCases: verdicts.filter(v => v === "Accepted").length,
+    verdicts,
+    allPassed
+  });
 });
 
 router.post('/mark-solved', verifyUser, async (req, res) => {

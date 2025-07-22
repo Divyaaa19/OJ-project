@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { HiOutlineArrowLeft, HiOutlinePlus, HiOutlineTrash, HiOutlineCheck } from "react-icons/hi";
@@ -31,6 +31,13 @@ export default function AddProblem() {
     python: `# your code here\ndef main():\n    pass\n\nif __name__ == "__main__":\n    main()`,
     java: `public class Main {\n    public static void main(String[] args) {\n        // your code here\n    }\n}`,
   };
+
+  useEffect(() => {
+    if (!adminCode) {
+      setAdminCode(codeTemplates['cpp']);
+    }
+    // eslint-disable-next-line
+  }, []);
 
   const handleChange = (e) => {
     setProblem({ ...problem, [e.target.name]: e.target.value });
@@ -164,7 +171,7 @@ export default function AddProblem() {
       </div>
 
       {/* Main Content */}
-      <div className="px-8 lg:px-12 pb-12 -mt-8">
+      <div className="px-8 lg:px-12 pb-12 mt-4">
         <div className="max-w-3xl mx-auto">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Problem Details Section */}

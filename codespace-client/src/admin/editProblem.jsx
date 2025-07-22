@@ -65,9 +65,9 @@ export default function EditProblem() {
 
   const removeTestCase = (index) => {
     if (problem.testCases.length > 1) {
-      const updated = [...problem.testCases];
-      updated.splice(index, 1);
-      setProblem({ ...problem, testCases: updated });
+    const updated = [...problem.testCases];
+    updated.splice(index, 1);
+    setProblem({ ...problem, testCases: updated });
     }
   };
 
@@ -140,7 +140,7 @@ export default function EditProblem() {
         </div>
       </div>
       {/* Main Content */}
-      <div className="px-2 lg:px-12 pb-12 -mt-6">
+      <div className="px-2 lg:px-12 pb-12 mt-4">
         <div className="max-w-3xl mx-auto">
           {/* Edit Problem Form */}
           <form onSubmit={handleSubmit} className="space-y-8">
@@ -158,19 +158,19 @@ export default function EditProblem() {
               {/* Two-column grid for main fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Title */}
-                <div>
+    <div>
                   <label className="block text-gray-300 font-medium mb-2">Problem Title</label>
-                  <input
-                    name="title"
-                    value={problem.title}
-                    onChange={handleChange}
+      <input
+        name="title"
+        value={problem.title}
+        onChange={handleChange}
                     placeholder="Enter problem title..."
-                    required
+        required
                     className="w-full p-4 bg-gray-800/80 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-400/20 outline-none transition-all duration-200 text-white placeholder-gray-400"
-                  />
-                </div>
+      />
+    </div>
                 {/* Difficulty */}
-                <div>
+    <div>
                   <label className="block text-gray-300 font-medium mb-2">Difficulty Level</label>
                   <select
                     name="difficulty"
@@ -186,28 +186,28 @@ export default function EditProblem() {
                 {/* Description */}
                 <div className="md:col-span-2">
                   <label className="block text-gray-300 font-medium mb-2">Problem Description</label>
-                  <textarea
-                    name="description"
-                    value={problem.description}
-                    onChange={handleChange}
+      <textarea
+        name="description"
+        value={problem.description}
+        onChange={handleChange}
                     placeholder="Describe the problem in detail..."
-                    required
+        required
                     rows={6}
                     className="w-full min-h-[120px] p-4 bg-gray-800/80 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-400/20 outline-none transition-all duration-200 text-white placeholder-gray-400 resize-y"
-                  />
-                </div>
+      />
+    </div>
                 {/* Constraints */}
                 <div className="md:col-span-2">
                   <label className="block text-gray-300 font-medium mb-2">Constraints (Optional)</label>
-                  <textarea
-                    name="constraints"
-                    value={problem.constraints}
-                    onChange={handleChange}
+      <textarea
+        name="constraints"
+        value={problem.constraints}
+        onChange={handleChange}
                     placeholder="Specify any constraints or limitations..."
                     rows={4}
                     className="w-full min-h-[80px] p-4 bg-gray-800/80 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-400/20 outline-none transition-all duration-200 text-white placeholder-gray-400 resize-y"
-                  />
-                </div>
+      />
+    </div>
               </div>
             </div>
             {/* Test Cases Section */}
@@ -229,25 +229,25 @@ export default function EditProblem() {
                   <HiOutlinePlus className="text-lg" />
                   <span className="font-semibold">Add Test Case</span>
                 </button>
-              </div>
+    </div>
               <div className="space-y-6">
                 {problem.testCases.map((tc, index) => (
                   <div key={index} className="bg-gray-900/80 border border-gray-700 rounded-2xl p-6 space-y-4 relative">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
+    <div>
                         <label className="block text-gray-400 mb-1">Input</label>
-                        <textarea
-                          value={tc.input}
+          <textarea
+            value={tc.input}
                           onChange={(e) => handleTestCaseChange(index, 'input', e.target.value)}
                           placeholder="Test case input..."
-                          rows={3}
+            rows={3}
                           className="w-full min-h-[48px] p-3 bg-gray-800/80 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-400/20 outline-none text-white placeholder-gray-400 resize-y"
-                        />
+          />
                       </div>
                       <div>
                         <label className="block text-gray-400 mb-1">Expected Output</label>
-                        <input
-                          value={tc.output}
+          <input
+            value={tc.output}
                           onChange={(e) => handleTestCaseChange(index, 'output', e.target.value)}
                           placeholder="Expected output..."
                           className="w-full p-3 bg-gray-800/80 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-400/20 outline-none text-white placeholder-gray-400"
@@ -257,7 +257,7 @@ export default function EditProblem() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-gray-400 mb-1">Explanation <span className="text-gray-500">(optional)</span></label>
-                        <input
+          <input
                           value={tc.explanation || ''}
                           onChange={(e) => handleTestCaseChange(index, 'explanation', e.target.value)}
                           placeholder="Explanation for this test case..."
@@ -266,9 +266,9 @@ export default function EditProblem() {
                       </div>
                       <div className="flex items-center gap-2 mt-2 md:mt-0">
                         <label className="flex items-center gap-2 text-gray-300 cursor-pointer select-none">
-                          <input
-                            type="checkbox"
-                            checked={tc.hidden || false}
+  <input
+    type="checkbox"
+    checked={tc.hidden || false}
                             onChange={(e) => handleTestCaseChange(index, 'hidden', e.target.checked)}
                             className="form-checkbox h-5 w-5 text-blue-500 rounded focus:ring-blue-400/20 border-gray-600 bg-gray-800"
                           />
@@ -278,20 +278,20 @@ export default function EditProblem() {
                             <FaEye className="text-lg text-gray-400" />
                           )}
                           <span className="text-sm">Hidden</span>
-                        </label>
+</label>
                       </div>
                     </div>
-                    {problem.testCases.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeTestCase(index)}
+          {problem.testCases.length > 1 && (
+            <button
+              type="button"
+              onClick={() => removeTestCase(index)}
                         className="absolute top-4 right-4 flex items-center gap-1 text-red-400 hover:text-red-200 bg-red-900/30 hover:bg-red-900/60 px-3 py-1 rounded-lg text-sm font-semibold transition-all duration-150"
-                      >
+            >
                         <HiOutlineTrash className="text-base" /> Remove
-                      </button>
-                    )}
-                  </div>
-                ))}
+            </button>
+          )}
+        </div>
+      ))}
               </div>
             </div>
             {/* Test Environment */}
@@ -360,7 +360,7 @@ export default function EditProblem() {
                 className="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded text-white font-semibold shadow-lg disabled:opacity-50"
               >
                 {isTesting ? "Running..." : "Run Against All Test Cases"}
-              </button>
+      </button>
               {testResults.length > 0 && (
                 <div className="mt-6">
                   <div className={`mb-4 text-lg font-bold ${testResults.every(r => r.verdict === 'Accepted') ? 'text-green-400' : 'text-red-400'}`}
@@ -411,19 +411,19 @@ export default function EditProblem() {
                   </div>
                 </div>
               )}
-            </div>
+    </div>
             {/* Update Problem Button */}
             <div className="flex justify-end mt-8">
-              <button
-                type="submit"
+    <button
+      type="submit"
                 disabled={loading}
                 className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-8 py-3 rounded-xl text-white font-bold shadow-lg text-lg disabled:opacity-60 transition-all duration-200"
-              >
+    >
                 {loading ? "Updating..." : "Update Problem"}
-              </button>
+    </button>
             </div>
-          </form>
-        </div>
+  </form>
+</div>
       </div>
       <ToastContainer position="top-right" autoClose={3000} />
     </div>

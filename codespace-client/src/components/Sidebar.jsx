@@ -65,18 +65,18 @@ export default function Sidebar({
             <span className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 via-cyan-300 to-purple-300 drop-shadow tracking-tight">
               {getTimeGreeting()}, {userData.name}!
             </span>
+            <div className="mt-1 w-3/4 h-0.5 bg-gradient-to-r from-blue-200/40 via-cyan-200/30 to-purple-200/40 rounded-full"></div>
           </div>
         )}
         {/* Title */}
         {!collapsed && (
-          <div className="mt-2 mb-6 flex flex-col items-center">
+          <div className="mt-4 mb-6 flex flex-col items-center">
             <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400 drop-shadow-[0_2px_24px_rgba(56,189,248,0.25)] tracking-tight text-center transition-all duration-500">
               Dashboard
             </h2>
             <div className="w-2/3 h-1 bg-gradient-to-r from-blue-400/40 via-cyan-300/30 to-purple-400/40 blur-sm rounded-full mt-2"></div>
           </div>
         )}
-
         {/* Pie Chart (expanded only) */}
         {!collapsed && (
           <div className="w-full flex justify-center items-center mb-8">
@@ -85,7 +85,6 @@ export default function Sidebar({
             </div>
           </div>
         )}
-
         {/* Tabs */}
         <nav className="space-y-2 w-full flex mt-6 flex-col items-center">
           <SidebarTab
@@ -111,17 +110,16 @@ export default function Sidebar({
           />
         </nav>
       </div>
-
       {/* Logout Button */}
       <button
         onClick={handleLogout}
         className={`flex items-center ${
           collapsed ? "justify-center" : "justify-start"
-        } gap-2 px-3 py-3 rounded-lg mb-2 bg-gray-800/80 hover:bg-gray-700/80 border border-gray-700 hover:border-gray-600 shadow transition-all duration-200`}
+        } gap-2 px-3 py-3 rounded-lg mb-2 bg-red-500/20 hover:bg-red-500/40 border border-red-500 shadow transition-all duration-200`}
       >
-        <HiOutlineLogout className="text-xl min-w-[20px] text-gray-300" />
+        <HiOutlineLogout className="text-xl min-w-[20px] text-white" />
         {!collapsed && (
-          <span className="text-gray-300 text-sm font-medium">
+          <span className="text-white text-sm font-medium">
             Logout
           </span>
         )}
