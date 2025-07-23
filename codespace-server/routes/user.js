@@ -60,7 +60,7 @@ router.get("/submissions/:problemId", verifyUser, async (req, res) => {
       const updatedSubmissions = await Submission.find({ userId, problemId }).sort({ timestamp: -1 });
       res.json(updatedSubmissions);
     } else {
-      res.json(submissions);
+    res.json(submissions);
     }
   } catch (error) {
     console.error("Failed to fetch submissions:", error);
@@ -315,6 +315,16 @@ router.patch("/change-password", verifyUser, async (req, res) => {
   } catch (error) {
     console.error("Change password error:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Public: Get all problems (title, difficulty)
+router.get("/public/problems", async (req, res) => {
+  try {
+    const problems = await Problem.find().select("title difficulty");
+    res.json(problems);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch problems" });
   }
 });
 

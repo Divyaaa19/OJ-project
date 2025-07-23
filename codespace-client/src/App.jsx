@@ -7,7 +7,10 @@ import UserDashboard from "./pages/UserDashboard";
 import AddProblem from "./admin/addProblem";
 import EditProblem from "./admin/editProblem";
 import ProblemDetail from "./admin/problemDetail";
-import UserProblemPage from "./pages/UserProblemPage"; 
+import UserProblemPage from "./pages/UserProblemPage";
+import ProblemsPage from "./pages/ProblemsPage";
+import ContestsComingSoon from "./pages/ContestsComingSoon";
+import LeaderboardPlaceholder from "./pages/LeaderboardPlaceholder";
 
 function App() {
   return (
@@ -21,6 +24,9 @@ function App() {
       <Route path="/admin/edit-problem/:id" element={<EditProblem />} />
       <Route path="/problems/:id" element={<ProblemDetail />} />
       <Route path="/user-problems/:id" element={<UserProblemPage />} />
+      <Route path="/problems" element={<ProblemsPage />} />
+      <Route path="/contests" element={<ContestsComingSoon />} />
+      <Route path="/leaderboard" element={<LeaderboardPlaceholder />} />
     </Routes>
   );
 }

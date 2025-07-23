@@ -10,6 +10,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -291,7 +292,7 @@ export default function UserProblemPage() {
 
   const submitCode = async () => {
     setIsSubmitting(true);
-    try {
+      try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
         "http://localhost:5000/api/user/submit",
@@ -306,18 +307,18 @@ export default function UserProblemPage() {
       setVerdicts(res.data.verdicts);
       setOutputs([]); // No outputs for hidden cases
       if (res.data.allPassed) {
-        setFinalVerdict("Accepted");
+      setFinalVerdict("Accepted");
         setShowEdgeCasesButton(false);
         setShowEdgeCasesModal(false);
         setEdgeCases("");
         toast.success("✅ All test cases passed! Code submitted successfully.");
-        await axios.post(
-          "http://localhost:5000/api/user/mark-solved",
-          { problemId: id },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const aiRes = await axios.post(
-          "http://localhost:5000/api/ai/complexity",
+      await axios.post(
+        "http://localhost:5000/api/user/mark-solved",
+        { problemId: id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const aiRes = await axios.post(
+        "http://localhost:5000/api/ai/complexity",
           { code, language },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -491,18 +492,16 @@ export default function UserProblemPage() {
                 </span>
               </div>
               <p className="mb-4 text-blue-100/90 text-lg leading-relaxed" style={{ whiteSpace: "pre-wrap" }}>
-                {problem.description}
+                  {problem.description}
               </p>
               <h3 className="text-xl font-bold mb-2 text-blue-300">Constraints</h3>
-              <ul className="list-disc list-inside text-blue-200/80 mb-4 text-base">
-                {problem.constraints?.split("\n").map((c, i) => (
-                  <li key={i}>{c}</li>
-                ))}
-              </ul>
+              <div className="prose prose-invert max-w-none text-blue-200/80 mb-4 text-base">
+                <ReactMarkdown rehypePlugins={[rehypeRaw]}>{problem.constraints}</ReactMarkdown>
+              </div>
               <h3 className="text-xl font-bold mb-2 text-blue-300">Examples</h3>
               {problem.testCases?.filter((tc) => !tc.hidden).map((tc, i) => (
-                <div
-                  key={i}
+                      <div
+                        key={i}
                   className="mb-3 p-4 bg-blue-400/10 rounded-xl text-base text-blue-100 border border-blue-700/20 shadow-sm"
                 >
                   <p style={{ whiteSpace: "pre-wrap" }}>
@@ -515,13 +514,13 @@ export default function UserProblemPage() {
                     <br />
                     {tc.output}
                   </p>
-                  {tc.explanation && (
+                        {tc.explanation && (
                     <p className="mt-2">
                       <strong>Explanation:</strong> {tc.explanation}
                     </p>
-                  )}
-                </div>
-              ))}
+                        )}
+                      </div>
+                    ))}
             </>
           )}
 
@@ -530,41 +529,52 @@ export default function UserProblemPage() {
               {submissions.length === 0 ? (
                 <p>No submissions yet.</p>
               ) : (
-                <table className="w-full mt-4 text-left text-base rounded-2xl overflow-hidden shadow-2xl border border-blue-700/30 bg-gradient-to-br from-gray-900/80 via-gray-800/80 to-gray-900/80 backdrop-blur-xl">
+                <table className="w-full mt-4 text-left text-sm rounded-2xl overflow-hidden shadow-2xl border border-blue-700/30 bg-gradient-to-br from-gray-900/80 via-gray-800/80 to-gray-900/80 backdrop-blur-xl">
                   <thead className="bg-blue-900/40 text-blue-300 uppercase tracking-wider text-xs">
                     <tr>
                       <th className="px-4 py-3">No.</th>
                       <th className="px-4 py-3">Language</th>
                       <th className="px-4 py-3">Time</th>
                       <th className="px-4 py-3">Code</th>
+                      <th className="px-4 py-3">Verdict</th>
                     </tr>
                   </thead>
                   <tbody className="text-blue-100">
-                    {submissions.map((sub, idx) => (
-                      <tr
-                        key={sub._id}
+                      {submissions.map((sub, idx) => (
+                        <tr
+                          key={sub._id}
                         className="hover:bg-blue-400/10 transition duration-150 border-t border-blue-700/20"
-                      >
-                        <td className="px-4 py-3 font-semibold">{idx + 1}</td>
-                        <td className="px-4 py-3 capitalize">{sub.language}</td>
-                        <td className="px-4 py-3">
+                        >
+                        <td className="px-2 py-2 font-semibold text-sm whitespace-nowrap">{idx + 1}</td>
+                        <td className="px-2 py-2 capitalize text-sm whitespace-nowrap">{sub.language}</td>
+                        <td className="px-2 py-2 text-sm whitespace-nowrap">
                           {dayjs(sub.timestamp).tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm:ss")}
-                        </td>
-                        <td className="px-4 py-3">
-                          <button
-                            onClick={() => {
-                              setModalCode(sub.code);
-                              setShowModal(true);
-                            }}
+                          </td>
+                        <td className="px-2 py-2 text-sm whitespace-nowrap">
+                            <button
+                              onClick={() => {
+                                setModalCode(sub.code);
+                                setShowModal(true);
+                              }}
                             className="text-blue-400 hover:text-blue-100 hover:underline font-semibold"
-                          >
-                            View Code
-                          </button>
+                            >
+                              View Code
+                            </button>
+                          </td>
+                        <td className="px-2 py-2 text-center text-sm whitespace-nowrap">
+                          <span className={`inline-block font-bold rounded-xl text-sm whitespace-nowrap
+                            ${sub.verdict === 'Accepted' ? 'bg-green-900/40 text-green-300 border border-green-500/30' :
+                              sub.verdict === 'Wrong Answer' ? 'bg-red-900/40 text-red-300 border border-red-500/30' :
+                              'bg-gray-800/40 text-blue-100 border border-blue-700/20'}
+                            px-2 py-1
+                          `}>
+                            {sub.verdict || '—'}
+                          </span>
                         </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
               )}
             </div>
           )}
@@ -614,17 +624,17 @@ export default function UserProblemPage() {
                 </button>
                 {/* Submission/AI Buttons Row */}
                 <div className="flex gap-2 items-center">
-                  <button
-                    onClick={submitCode}
+                <button
+                  onClick={submitCode}
                     className="px-6 py-2 rounded-lg text-white font-semibold shadow transition bg-gradient-to-tr from-green-700 via-green-500 to-green-400 hover:from-green-600 hover:to-green-300 hover:scale-105 border border-green-700/30"
                     disabled={isRunning || isSubmitting}
-                  >
-                    Submit
-                  </button>
-                  {finalVerdict === "Accepted" && (
-                    <button
-                      onClick={getComplexity}
-                      title="Analyze Time & Space Complexity"
+                >
+                  Submit
+                </button>
+                {finalVerdict === "Accepted" && (
+                  <button
+                    onClick={getComplexity}
+                    title="Analyze Time & Space Complexity"
                       className="p-2 rounded-full shadow bg-gradient-to-tr from-purple-600 to-pink-500 hover:opacity-90 hover:scale-105 transition flex items-center justify-center border border-purple-700 mt-1"
                       aria-label="complexity"
                       disabled={isRunning || isSubmitting}
@@ -641,10 +651,10 @@ export default function UserProblemPage() {
                       disabled={loadingEdgeCases || isRunning || isSubmitting}
                     >
                       <span className="text-lg">🧩</span>
-                    </button>
-                  )}
-                </div>
+                  </button>
+                )}
               </div>
+            </div>
             </div>
             <div className="flex-1 min-h-0 overflow-hidden p-2 bg-gray-900/80 rounded-xl shadow mt-2 border border-blue-700/20">
               <div className="h-full overflow-auto">

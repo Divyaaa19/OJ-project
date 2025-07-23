@@ -93,7 +93,7 @@ export default function EditProblem() {
         }
       );
       toast.success("Problem updated!");
-      navigate("/admin-dashboard");
+      setTimeout(() => navigate("/admin-dashboard"), 1200);
     } catch (err) {
       toast.error("Update failed.");
       console.error(err);
