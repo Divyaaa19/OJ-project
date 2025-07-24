@@ -19,7 +19,7 @@ export default function UserDashboard() {
   const token = localStorage.getItem("token");
 
   const fetchData = async () => {
-    const res = await axios.get("http://localhost:5000/api/user/dashboard", {
+    const res = await axios.get(`${import.meta.env.VITE_API_URL}api/user/dashboard`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setProblems(res.data);
@@ -27,7 +27,7 @@ export default function UserDashboard() {
 
   const toggleFavorite = async (id) => {
     await axios.patch(
-      `http://localhost:5000/api/user/favorite/${id}`,
+      `${import.meta.env.VITE_API_URL}api/user/favorite/${id}`,
       {},
       {
         headers: { Authorization: `Bearer ${token}` },
@@ -40,7 +40,7 @@ export default function UserDashboard() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/user/profile", {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}api/user/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUserName(res.data.name || "User");

@@ -85,7 +85,7 @@ export default function AddProblem() {
       };
 
       await axios.post(
-        "http://localhost:5000/api/admin/problems",
+        `${import.meta.env.VITE_API_URL}api/admin/problems`,
         cleanedProblem,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -120,14 +120,18 @@ export default function AddProblem() {
     setIsTesting(true);
     setTestResults([]);
     try {
-      const res = await axios.post("http://localhost:5000/api/admin/test-solution", {
-        code: adminCode,
-        language: adminLanguage,
-        testCases: problem.testCases,
-        problemTitle: problem.title,
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}api/admin/test-solution`,
+        {
+          code: adminCode,
+          language: adminLanguage,
+          testCases: problem.testCases,
+          problemTitle: problem.title,
+        },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
       setTestResults(res.data.results);
       toast.success(res.data.verdict === "Accepted" ? "All test cases passed!" : "Some test cases failed.");
     } catch (err) {

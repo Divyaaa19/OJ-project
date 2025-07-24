@@ -32,7 +32,7 @@ export default function EditProblem() {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          `http://localhost:5000/api/admin/problems/${id}`,
+          `${import.meta.env.VITE_API_URL}api/admin/problems/${id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -86,7 +86,7 @@ export default function EditProblem() {
         }),
       };
       await axios.put(
-        `http://localhost:5000/api/admin/problems/${id}`,
+        `${import.meta.env.VITE_API_URL}api/admin/problems/${id}`,
         cleanedProblem,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -338,14 +338,18 @@ export default function EditProblem() {
                   setTestResults([]);
                   try {
                     const trimmedTestCases = problem.testCases.map(tc => ({ ...tc, input: (tc.input || '').trim() }));
-                    const res = await axios.post("http://localhost:5000/api/admin/test-solution", {
-                      code: adminCode,
-                      language: adminLanguage,
-                      testCases: trimmedTestCases,
-                      problemTitle: problem.title,
-                    }, {
-                      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-                    });
+                    const res = await axios.post(
+                      `${import.meta.env.VITE_API_URL}api/admin/test-solution`,
+                      {
+                        code: adminCode,
+                        language: adminLanguage,
+                        testCases: trimmedTestCases,
+                        problemTitle: problem.title,
+                      },
+                      {
+                        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+                      }
+                    );
                     setTestResults(res.data.results);
                     toast.success(res.data.verdict === "Accepted" ? "All test cases passed!" : "Some test cases failed.");
                   } catch (err) {

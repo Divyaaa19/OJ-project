@@ -127,7 +127,7 @@ export default function Activity() {
   const fetchActivityData = async () => {
     try {
       // Fetch submissions for activity data
-      const submissionsRes = await axios.get("http://localhost:5000/api/user/submissions", {
+      const submissionsRes = await axios.get(`${import.meta.env.VITE_API_URL}api/user/submissions`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -162,7 +162,7 @@ export default function Activity() {
 
     try {
       await axios.patch(
-        "http://localhost:5000/api/user/change-password",
+        `${import.meta.env.VITE_API_URL}api/user/change-password`,
         {
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword,

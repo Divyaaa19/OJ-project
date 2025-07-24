@@ -31,7 +31,7 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/admin/stats", {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}api/admin/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStats(res.data);
@@ -43,7 +43,7 @@ export default function AdminDashboard() {
   const fetchUserData = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/user/profile", {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}api/user/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUserData(res.data);
@@ -68,7 +68,7 @@ export default function AdminDashboard() {
   const fetchProblems = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/admin/problems", {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}api/admin/problems`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProblems(res.data);
@@ -80,7 +80,7 @@ export default function AdminDashboard() {
   const deleteProblem = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/api/admin/problems/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}api/admin/problems/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProblems(problems.filter(p => p._id !== id));
@@ -102,7 +102,7 @@ export default function AdminDashboard() {
     try {
       const token = localStorage.getItem("token");
       await axios.patch(
-        "http://localhost:5000/api/user/change-password",
+        `${import.meta.env.VITE_API_URL}api/user/change-password`,
         {
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword,
@@ -122,7 +122,7 @@ export default function AdminDashboard() {
   const fetchAdminSubmissions = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/admin/submissions", {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}api/admin/submissions`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAdminSubmissions(res.data);

@@ -77,7 +77,7 @@ router.post("/test-solution", verifyAdmin, async (req, res) => {
 
   for (const tc of testCases) {
     try {
-      const runRes = await axios.post("http://localhost:8000/run", {
+      const runRes = await axios.post(`${process.env.COMPILER_URL}run`, {
         language,
         code,
         input: tc.input,

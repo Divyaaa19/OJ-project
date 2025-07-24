@@ -118,7 +118,7 @@ export default function UserProblemPage() {
       const token = localStorage.getItem("token");
 
       const res = await axios.post(
-        "http://localhost:5000/api/ai/complexity",
+        `${import.meta.env.VITE_API_URL}api/ai/complexity`,
         { code, language },
         {
           headers: {
@@ -156,7 +156,7 @@ export default function UserProblemPage() {
       const token = localStorage.getItem("token");
 
       const res = await axios.post(
-        "http://localhost:5000/api/ai/review",
+        `${import.meta.env.VITE_API_URL}api/ai/review`,
         { code, language },
         {
           headers: {
@@ -207,13 +207,13 @@ export default function UserProblemPage() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     axios
-      .get(`http://localhost:5000/api/user/user-problems/${id}`, {
+      .get(`${import.meta.env.VITE_API_URL}api/user/user-problems/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
         setProblem(res.data);
         axios
-          .get(`http://localhost:5000/api/user/submissions/${id}`, {
+          .get(`${import.meta.env.VITE_API_URL}api/user/submissions/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
           })
           .then((res) => {
@@ -295,7 +295,7 @@ export default function UserProblemPage() {
       try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "http://localhost:5000/api/user/submit",
+        `${import.meta.env.VITE_API_URL}api/user/submit`,
         {
           problemId: id,
           code,
@@ -313,19 +313,19 @@ export default function UserProblemPage() {
         setEdgeCases("");
         toast.success("✅ All test cases passed! Code submitted successfully.");
       await axios.post(
-        "http://localhost:5000/api/user/mark-solved",
+        `${import.meta.env.VITE_API_URL}api/user/mark-solved`,
         { problemId: id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const aiRes = await axios.post(
-        "http://localhost:5000/api/ai/complexity",
+        `${import.meta.env.VITE_API_URL}api/ai/complexity`,
           { code, language },
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setTcScEstimation(aiRes.data.complexity);
         setShowReviewButton(true);
         const updated = await axios.get(
-          `http://localhost:5000/api/user/submissions/${id}`,
+          `${import.meta.env.VITE_API_URL}api/user/submissions/${id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setSubmissions(updated.data);
@@ -337,7 +337,7 @@ export default function UserProblemPage() {
         setEdgeCases("");
         toast.error("❌ Some test cases failed. Please try again.");
         const updated = await axios.get(
-          `http://localhost:5000/api/user/submissions/${id}`,
+          `${import.meta.env.VITE_API_URL}api/user/submissions/${id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setSubmissions(updated.data);
@@ -364,7 +364,7 @@ export default function UserProblemPage() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "http://localhost:5000/api/ai/edge-cases",
+        `${import.meta.env.VITE_API_URL}api/ai/edge-cases`,
         {
           code,
           language,

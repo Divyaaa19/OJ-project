@@ -13,7 +13,7 @@ export default function ProblemsPage() {
   useEffect(() => {
     async function fetchProblems() {
       try {
-        const res = await axios.get("http://localhost:5000/api/user/public/problems");
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}api/user/public/problems`);
         setProblems(res.data);
         console.log('PROBLEMS:', res.data);
       } catch (err) {

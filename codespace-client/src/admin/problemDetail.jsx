@@ -10,7 +10,7 @@ export default function ProblemDetail() {
     const fetchProblem = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get(`http://localhost:5000/api/admin/problems/${id}`, {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}api/admin/problems/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setProblem(res.data);
