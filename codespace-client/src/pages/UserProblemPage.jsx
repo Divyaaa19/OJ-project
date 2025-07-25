@@ -10,7 +10,6 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import ReactMarkdown from "react-markdown";
-import rehypeRaw from "rehype-raw";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -253,7 +252,7 @@ export default function UserProblemPage() {
         expected = (customCases[i - problem.testCases.length]?.output || "").trim().replace(/\s+/g, " ");
       }
       try {
-        const res = await axios.post("http://localhost:8000/run", {
+        const res = await axios.post(`${import.meta.env.VITE_COMPILER_URL}run`, {
           language,
           code,
           input: input.trim(),
@@ -529,28 +528,27 @@ export default function UserProblemPage() {
               {submissions.length === 0 ? (
                 <p>No submissions yet.</p>
               ) : (
-                <table className="w-full mt-4 text-left text-sm rounded-2xl overflow-hidden shadow-2xl border border-blue-700/30 bg-gradient-to-br from-gray-900/80 via-gray-800/80 to-gray-900/80 backdrop-blur-xl">
+                <table className="w-full mt-4 text-left text-base rounded-2xl overflow-hidden shadow-2xl border border-blue-700/30 bg-gradient-to-br from-gray-900/80 via-gray-800/80 to-gray-900/80 backdrop-blur-xl">
                   <thead className="bg-blue-900/40 text-blue-300 uppercase tracking-wider text-xs">
                     <tr>
                       <th className="px-4 py-3">No.</th>
                       <th className="px-4 py-3">Language</th>
                       <th className="px-4 py-3">Time</th>
                       <th className="px-4 py-3">Code</th>
-                      <th className="px-4 py-3">Verdict</th>
-                    </tr>
-                  </thead>
+                      </tr>
+                    </thead>
                   <tbody className="text-blue-100">
                       {submissions.map((sub, idx) => (
                         <tr
                           key={sub._id}
                         className="hover:bg-blue-400/10 transition duration-150 border-t border-blue-700/20"
                         >
-                        <td className="px-2 py-2 font-semibold text-sm whitespace-nowrap">{idx + 1}</td>
-                        <td className="px-2 py-2 capitalize text-sm whitespace-nowrap">{sub.language}</td>
-                        <td className="px-2 py-2 text-sm whitespace-nowrap">
+                        <td className="px-4 py-3 font-semibold">{idx + 1}</td>
+                        <td className="px-4 py-3 capitalize">{sub.language}</td>
+                        <td className="px-4 py-3">
                           {dayjs(sub.timestamp).tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm:ss")}
                           </td>
-                        <td className="px-2 py-2 text-sm whitespace-nowrap">
+                        <td className="px-4 py-3">
                             <button
                               onClick={() => {
                                 setModalCode(sub.code);
@@ -561,16 +559,6 @@ export default function UserProblemPage() {
                               View Code
                             </button>
                           </td>
-                        <td className="px-2 py-2 text-center text-sm whitespace-nowrap">
-                          <span className={`inline-block font-bold rounded-xl text-sm whitespace-nowrap
-                            ${sub.verdict === 'Accepted' ? 'bg-green-900/40 text-green-300 border border-green-500/30' :
-                              sub.verdict === 'Wrong Answer' ? 'bg-red-900/40 text-red-300 border border-red-500/30' :
-                              'bg-gray-800/40 text-blue-100 border border-blue-700/20'}
-                            px-2 py-1
-                          `}>
-                            {sub.verdict || '—'}
-                          </span>
-                        </td>
                         </tr>
                       ))}
                     </tbody>

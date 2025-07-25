@@ -61,9 +61,9 @@ export default function AddProblem() {
 
   const removeTestCase = (index) => {
     if (problem.testCases.length > 1) {
-      const updated = [...problem.testCases];
-      updated.splice(index, 1);
-      setProblem({ ...problem, testCases: updated });
+    const updated = [...problem.testCases];
+    updated.splice(index, 1);
+    setProblem({ ...problem, testCases: updated });
     }
   };
 
@@ -186,19 +186,19 @@ export default function AddProblem() {
                 </div>
                 <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
                   Problem Details
-                </h2>
+      </h2>
               </div>
 
                             <div className="space-y-6">
                 {/* Title */}
                 <div>
                   <label className="block text-gray-300 font-medium mb-2">Problem Title</label>
-                  <input
-                    name="title"
-                    value={problem.title}
-                    onChange={handleChange}
+        <input
+          name="title"
+          value={problem.title}
+          onChange={handleChange}
                     placeholder="Enter problem title..."
-                    required
+          required
                     className="w-full p-4 bg-gray-800/80 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-400/20 outline-none transition-all duration-200 text-white placeholder-gray-400"
                   />
                 </div>
@@ -222,24 +222,24 @@ export default function AddProblem() {
               {/* Description */}
               <div className="mt-6">
                 <label className="block text-gray-300 font-medium mb-2">Problem Description</label>
-                <textarea
-                  name="description"
-                  value={problem.description}
-                  onChange={handleChange}
+        <textarea
+          name="description"
+          value={problem.description}
+          onChange={handleChange}
                   placeholder="Describe the problem in detail..."
-                  required
+          required
                   rows={6}
                   className="w-full p-4 bg-gray-800/80 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-400/20 outline-none transition-all duration-200 text-white placeholder-gray-400 resize-vertical"
-                />
+        />
               </div>
 
               {/* Constraints */}
               <div className="mt-6">
                 <label className="block text-gray-300 font-medium mb-2">Constraints (Optional)</label>
-                <textarea
-                  name="constraints"
-                  value={problem.constraints}
-                  onChange={handleChange}
+        <textarea
+          name="constraints"
+          value={problem.constraints}
+          onChange={handleChange}
                   placeholder="Specify any constraints or limitations..."
                   rows={4}
                   className="w-full p-4 bg-gray-800/80 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-400/20 outline-none transition-all duration-200 text-white placeholder-gray-400 resize-vertical"
@@ -269,7 +269,7 @@ export default function AddProblem() {
               </div>
 
               <div className="space-y-6">
-                {problem.testCases.map((tc, index) => (
+        {problem.testCases.map((tc, index) => (
                   <div key={index} className="bg-gray-800/60 p-6 rounded-2xl border border-gray-700/50 hover:border-gray-600/50 transition-all duration-200">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold text-gray-300">
@@ -291,8 +291,8 @@ export default function AddProblem() {
                       {/* Input */}
                       <div>
                         <label className="block text-gray-300 font-medium mb-2">Input</label>
-                        <textarea
-                          value={tc.input}
+            <textarea
+              value={tc.input}
                           onChange={(e) => handleTestCaseChange(index, "input", e.target.value)}
                           placeholder="Enter test case input..."
                           rows={4}
@@ -304,12 +304,12 @@ export default function AddProblem() {
                       <div>
                         <label className="block text-gray-300 font-medium mb-2">Expected Output</label>
                         <textarea
-                          value={tc.output}
+              value={tc.output}
                           onChange={(e) => handleTestCaseChange(index, "output", e.target.value)}
                           placeholder="Enter expected output..."
                           rows={4}
                           className="w-full p-3 bg-gray-900/80 border border-gray-700 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-400/20 outline-none transition-all duration-200 text-white placeholder-gray-400 font-mono text-sm resize-vertical"
-                        />
+            />
                       </div>
                     </div>
 
@@ -317,28 +317,28 @@ export default function AddProblem() {
                     <div className="mt-4">
                       <label className="block text-gray-300 font-medium mb-2">Explanation (Optional)</label>
                       <textarea
-                        value={tc.explanation}
+              value={tc.explanation}
                         onChange={(e) => handleTestCaseChange(index, "explanation", e.target.value)}
                         placeholder="Explain the test case logic..."
                         rows={3}
                         className="w-full p-3 bg-gray-900/80 border border-gray-700 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-400/20 outline-none transition-all duration-200 text-white placeholder-gray-400 resize-vertical"
-                      />
+            />
                     </div>
 
                     {/* Hidden Test Case Toggle */}
                     <div className="mt-4">
                       <label className="flex items-center gap-3 text-gray-300 font-medium cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={tc.hidden || false}
-                          onChange={(e) => handleTestCaseChange(index, "hidden", e.target.checked)}
+  <input
+    type="checkbox"
+    checked={tc.hidden || false}
+    onChange={(e) => handleTestCaseChange(index, "hidden", e.target.checked)}
                           className="w-4 h-4 text-blue-600 bg-gray-800 border-gray-700 rounded focus:ring-blue-500 focus:ring-2"
-                        />
+  />
                         <div className="flex items-center gap-2">
                           {tc.hidden ? <FaEyeSlash className="text-red-400" /> : <FaEye className="text-green-400" />}
                           <span>{tc.hidden ? "Hidden Test Case" : "Visible Test Case"}</span>
                         </div>
-                      </label>
+</label>
                       <p className="text-sm text-gray-400 mt-1 ml-7">
                         {tc.hidden ? "This test case will be hidden from users during practice." : "This test case will be visible to users."}
                       </p>
@@ -419,23 +419,23 @@ export default function AddProblem() {
                     </tbody>
                   </table>
                 </div>
-              )}
-            </div>
+            )}
+          </div>
 
             {/* Submit Section */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                type="button"
+        <button
+          type="button"
                 onClick={() => navigate("/admin-dashboard")}
                 className="flex-1 sm:flex-none px-8 py-4 bg-gray-800/80 hover:bg-gray-700/80 text-gray-300 hover:text-white rounded-xl border border-gray-700 hover:border-gray-600 transition-all duration-200 font-medium"
-              >
+        >
                 Cancel
-              </button>
-              <button
-                type="submit"
+        </button>
+        <button
+          type="submit"
                 disabled={loading}
                 className="flex-1 sm:flex-none px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl hover:transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              >
+        >
                 {loading ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -447,9 +447,9 @@ export default function AddProblem() {
                     Create Problem
                   </div>
                 )}
-              </button>
+        </button>
             </div>
-          </form>
+      </form>
         </div>
       </div>
       <ToastContainer position="top-right" autoClose={3000} />

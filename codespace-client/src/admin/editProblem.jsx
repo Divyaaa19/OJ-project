@@ -251,7 +251,7 @@ export default function EditProblem() {
                           onChange={(e) => handleTestCaseChange(index, 'output', e.target.value)}
                           placeholder="Expected output..."
                           className="w-full p-3 bg-gray-800/80 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-400/20 outline-none text-white placeholder-gray-400"
-                        />
+          />
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -262,7 +262,7 @@ export default function EditProblem() {
                           onChange={(e) => handleTestCaseChange(index, 'explanation', e.target.value)}
                           placeholder="Explanation for this test case..."
                           className="w-full p-3 bg-gray-800/80 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-400/20 outline-none text-white placeholder-gray-400"
-                        />
+          />
                       </div>
                       <div className="flex items-center gap-2 mt-2 md:mt-0">
                         <label className="flex items-center gap-2 text-gray-300 cursor-pointer select-none">
@@ -271,7 +271,7 @@ export default function EditProblem() {
     checked={tc.hidden || false}
                             onChange={(e) => handleTestCaseChange(index, 'hidden', e.target.checked)}
                             className="form-checkbox h-5 w-5 text-blue-500 rounded focus:ring-blue-400/20 border-gray-600 bg-gray-800"
-                          />
+  />
                           {tc.hidden ? (
                             <FaEyeSlash className="text-lg text-gray-400" />
                           ) : (

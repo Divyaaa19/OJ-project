@@ -7,7 +7,7 @@ import UserDashboard from "./pages/UserDashboard";
 import AddProblem from "./admin/addProblem";
 import EditProblem from "./admin/editProblem";
 import ProblemDetail from "./admin/problemDetail";
-import UserProblemPage from "./pages/UserProblemPage";
+import UserProblemPage from "./pages/UserProblemPage"; 
 import ProblemsPage from "./pages/ProblemsPage";
 import ContestsComingSoon from "./pages/ContestsComingSoon";
 import LeaderboardPlaceholder from "./pages/LeaderboardPlaceholder";
