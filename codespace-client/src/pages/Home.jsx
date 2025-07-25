@@ -10,6 +10,7 @@ export default function Home() {
     // Simulate user/admin state (replace with real auth logic)
     const isAdmin = false; // Set true to show Admin Panel card
     const userName = null; // Set to a string to show greeting
+    const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white overflow-hidden relative">
@@ -36,18 +37,35 @@ export default function Home() {
                     <Rocket className="w-8 h-8 text-blue-400" />
                     <span className="text-2xl font-extrabold bg-gradient-to-r from-blue-400 to-purple-400 text-transparent bg-clip-text tracking-tight">CodeSpace</span>
                 </div>
-                <nav className="flex gap-8 text-lg font-semibold">
+                {/* Desktop Nav */}
+                <nav className="hidden md:flex gap-8 text-lg font-semibold">
                     <button onClick={() => navigate("/problems")} className="hover:text-blue-400 transition">Problems</button>
                     <button onClick={() => navigate("/contests")} className="hover:text-purple-400 transition">Contests</button>
                     <button onClick={() => navigate("/leaderboard")} className="hover:text-yellow-400 transition">Leaderboard</button>
                     {isAdmin && <button onClick={() => navigate("/admin-dashboard")} className="hover:text-pink-400 transition">Admin</button>}
                 </nav>
+                {/* Mobile Hamburger */}
+                <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                    {/* Hamburger icon */}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-white"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                </button>
                 <div>
+                    {/* Login/Profile button */}
                     <button onClick={() => navigate(userName ? "/profile" : "/login")} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800/80 hover:bg-blue-700 transition font-semibold border border-blue-900/30">
                         <UserCircle className="w-6 h-6" />
                         {userName ? userName : "Login"}
                     </button>
                 </div>
+                {/* Mobile Menu */}
+                {mobileMenuOpen && (
+                    <div className="fixed inset-0 bg-black/70 z-50 flex flex-col items-center justify-center md:hidden">
+                        <button onClick={() => setMobileMenuOpen(false)} className="absolute top-4 right-4 text-white text-3xl">&times;</button>
+                        <button onClick={() => {navigate("/problems"); setMobileMenuOpen(false);}} className="text-white text-2xl mb-4">Problems</button>
+                        <button onClick={() => {navigate("/contests"); setMobileMenuOpen(false);}} className="text-white text-2xl mb-4">Contests</button>
+                        <button onClick={() => {navigate("/leaderboard"); setMobileMenuOpen(false);}} className="text-white text-2xl mb-4">Leaderboard</button>
+                        {isAdmin && <button onClick={() => {navigate("/admin-dashboard"); setMobileMenuOpen(false);}} className="text-white text-2xl mb-4">Admin</button>}
+                    </div>
+                )}
             </header>
 
             {/* Dashboard Panel */}
