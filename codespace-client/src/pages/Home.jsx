@@ -32,7 +32,13 @@ export default function Home() {
             </div>
 
             {/* Header Navigation */}
-            <header className="w-full px-8 py-5 flex items-center justify-between bg-gradient-to-r from-gray-900/80 via-blue-900/70 to-gray-800/80 shadow-lg border-b border-blue-900/30 z-10 relative">
+            <header className="w-full px-4 py-5 flex items-center justify-between bg-gradient-to-r from-gray-900/80 via-blue-900/70 to-gray-800/80 shadow-lg border-b border-blue-900/30 z-10 relative">
+                {/* Mobile Hamburger - now on the left */}
+                <button className="md:hidden p-2 mr-2" onClick={() => setMobileMenuOpen(true)} aria-label="Open menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8 text-blue-400">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
                 <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}> 
                     <Rocket className="w-8 h-8 text-blue-400" />
                     <span className="text-2xl font-extrabold bg-gradient-to-r from-blue-400 to-purple-400 text-transparent bg-clip-text tracking-tight">CodeSpace</span>
@@ -44,11 +50,6 @@ export default function Home() {
                     <button onClick={() => navigate("/leaderboard")} className="hover:text-yellow-400 transition">Leaderboard</button>
                     {isAdmin && <button onClick={() => navigate("/admin-dashboard")} className="hover:text-pink-400 transition">Admin</button>}
                 </nav>
-                {/* Mobile Hamburger */}
-                <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-                    {/* Hamburger icon */}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-white"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-                </button>
                 <div>
                     {/* Login/Profile button */}
                     <button onClick={() => navigate(userName ? "/profile" : "/login")} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800/80 hover:bg-blue-700 transition font-semibold border border-blue-900/30">
@@ -56,15 +57,20 @@ export default function Home() {
                         {userName ? userName : "Login"}
                     </button>
                 </div>
-                {/* Mobile Menu */}
+                {/* Mobile Sidebar Menu */}
                 {mobileMenuOpen && (
-                    <div className="fixed inset-0 bg-black/70 z-50 flex flex-col items-center justify-center md:hidden">
-                        <button onClick={() => setMobileMenuOpen(false)} className="absolute top-4 right-4 text-white text-3xl">&times;</button>
-                        <button onClick={() => {navigate("/problems"); setMobileMenuOpen(false);}} className="text-white text-2xl mb-4">Problems</button>
-                        <button onClick={() => {navigate("/contests"); setMobileMenuOpen(false);}} className="text-white text-2xl mb-4">Contests</button>
-                        <button onClick={() => {navigate("/leaderboard"); setMobileMenuOpen(false);}} className="text-white text-2xl mb-4">Leaderboard</button>
-                        {isAdmin && <button onClick={() => {navigate("/admin-dashboard"); setMobileMenuOpen(false);}} className="text-white text-2xl mb-4">Admin</button>}
-                    </div>
+                    <>
+                        {/* Overlay */}
+                        <div className="fixed inset-0 bg-black/60 z-40" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu overlay"></div>
+                        {/* Sidebar */}
+                        <aside className="fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-gray-900 via-blue-900 to-gray-800 shadow-2xl z-50 flex flex-col p-8 gap-6 animate-slideIn transform transition-transform duration-300">
+                            <button onClick={() => setMobileMenuOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white text-3xl" aria-label="Close menu">&times;</button>
+                            <button onClick={() => {navigate("/problems"); setMobileMenuOpen(false);}} className="text-left w-full py-3 px-2 rounded-lg text-lg font-bold text-blue-300 hover:bg-blue-800/30 transition">Problems</button>
+                            <button onClick={() => {navigate("/contests"); setMobileMenuOpen(false);}} className="text-left w-full py-3 px-2 rounded-lg text-lg font-bold text-purple-300 hover:bg-purple-800/30 transition">Contests</button>
+                            <button onClick={() => {navigate("/leaderboard"); setMobileMenuOpen(false);}} className="text-left w-full py-3 px-2 rounded-lg text-lg font-bold text-yellow-300 hover:bg-yellow-800/30 transition">Leaderboard</button>
+                            {isAdmin && <button onClick={() => {navigate("/admin-dashboard"); setMobileMenuOpen(false);}} className="text-left w-full py-3 px-2 rounded-lg text-lg font-bold text-pink-300 hover:bg-pink-800/30 transition">Admin</button>}
+                        </aside>
+                    </>
                 )}
             </header>
 
