@@ -496,7 +496,7 @@ export default function UserProblemPage() {
               <h3 className="text-xl font-bold mb-2 text-blue-300">Constraints</h3>
               <div className="prose prose-invert max-w-none text-blue-200/80 mb-4 text-base">
                 <ReactMarkdown rehypePlugins={[rehypeRaw]}>{problem.constraints}</ReactMarkdown>
-              </div>
+                </div>
               <h3 className="text-xl font-bold mb-2 text-blue-300">Examples</h3>
               {problem.testCases?.filter((tc) => !tc.hidden).map((tc, i) => (
                       <div

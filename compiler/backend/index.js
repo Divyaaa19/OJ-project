@@ -27,7 +27,7 @@ dotenv.config();
 
 //middlewares
 app.use(cors({
-  origin: "https://oj-project-faerv1i7s-divyavanis-projects.vercel.app/",  // ✅ replace this
+  origin: process.env.CLIENT_URL, 
   credentials: true
 }));
 app.use(express.urlencoded({ extended: true }));
