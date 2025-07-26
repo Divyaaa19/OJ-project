@@ -75,13 +75,19 @@ router.post("/test-solution", verifyAdmin, async (req, res) => {
   const results = [];
   let allAccepted = true;
 
+  console.log("Admin test-solution called with:", { language, testCases: testCases.length, problemTitle });
+
   for (const tc of testCases) {
     try {
+      console.log(`Testing case with input: "${tc.input}"`);
       const runRes = await axios.post(`${process.env.COMPILER_URL}run`, {
         language,
         code,
-        input: tc.input,
+        input: tc.input || "",
       });
+      
+      console.log("Compiler response:", runRes.data);
+      
       const output = (runRes.data.output || "").trim().replace(/\s+/g, " ");
       const expected = (tc.output || "").trim().replace(/\s+/g, " ");
       let verdict = "";
@@ -99,7 +105,14 @@ router.post("/test-solution", verifyAdmin, async (req, res) => {
       }
       results.push({ input: tc.input, expected, output, verdict });
     } catch (err) {
-      results.push({ input: tc.input, expected: tc.output, output: "Error", verdict: "Error" });
+      console.error("Compiler error for test case:", err.message);
+      console.error("Full error:", err);
+      results.push({ 
+        input: tc.input, 
+        expected: tc.output, 
+        output: `Error: ${err.message}`, 
+        verdict: "Error" 
+      });
       allAccepted = false;
     }
   }

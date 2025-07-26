@@ -198,6 +198,32 @@ router.post('/submit', verifyUser, async (req, res) => {
   });
 });
 
+// Add /run route for individual code execution
+router.post('/run', verifyUser, async (req, res) => {
+  const { language, code, input } = req.body;
+  
+  console.log("User run called with:", { language, input: input ? input.substring(0, 50) + "..." : "empty" });
+  
+  try {
+    const runRes = await axios.post(`${process.env.COMPILER_URL}run`, {
+      language,
+      code,
+      input: input || "",
+    });
+    
+    console.log("Compiler response:", runRes.data);
+    res.json(runRes.data);
+  } catch (err) {
+    console.error("Compiler error:", err.message);
+    console.error("Full error:", err);
+    res.status(500).json({ 
+      error: 'Compiler error', 
+      details: err.message,
+      output: `Error: ${err.message}`
+    });
+  }
+});
+
 router.post('/mark-solved', verifyUser, async (req, res) => {
   try {
     const { problemId } = req.body;

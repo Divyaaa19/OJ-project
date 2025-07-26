@@ -253,10 +253,13 @@ export default function UserProblemPage() {
         expected = (customCases[i - problem.testCases.length]?.output || "").trim().replace(/\s+/g, " ");
       }
       try {
-        const res = await axios.post(`${import.meta.env.VITE_COMPILER_URL}run`, {
+        const token = localStorage.getItem("token");
+        const res = await axios.post(`${import.meta.env.VITE_API_URL}api/user/run`, {
           language,
           code,
           input: input.trim(),
+        }, {
+          headers: { Authorization: `Bearer ${token}` },
         });
         const output = (res.data.output || "").trim().replace(/\s+/g, " ");
         let verdict = "";
