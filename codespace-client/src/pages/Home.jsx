@@ -12,24 +12,24 @@ export default function Home() {
     const userName = null; // Set to a string to show greeting
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
-    return (
-        <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white overflow-hidden relative">
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white overflow-hidden relative">
             {/* Background overlays and stars */}
             <div className="absolute inset-0 -z-20 bg-gradient-to-b from-gray-900 via-indigo-900 to-black overflow-hidden">
                 <div className="absolute inset-0 w-full h-full bg-gradient-radial from-blue-200/40 via-pink-200/30 to-transparent opacity-80 pointer-events-none" />
-                {[...Array(60)].map((_, i) => (
-                    <div
-                        key={i}
-                        className="absolute bg-white rounded-full"
-                        style={{
-                            width: `${Math.random() * 3 + 1}px`,
-                            height: `${Math.random() * 3 + 1}px`,
-                            top: `${Math.random() * 100}%`,
-                            left: `${Math.random() * 100}%`,
-                        }}
-                    />
-                ))}
-            </div>
+        {[...Array(60)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute bg-white rounded-full"
+            style={{
+              width: `${Math.random() * 3 + 1}px`,
+              height: `${Math.random() * 3 + 1}px`,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+            }}
+          />
+        ))}
+      </div>
 
             {/* Header Navigation */}
             <header className="w-full px-4 py-5 flex items-center justify-between bg-gradient-to-r from-gray-900/80 via-blue-900/70 to-gray-800/80 shadow-lg border-b border-blue-900/30 z-10 relative">
@@ -61,14 +61,14 @@ export default function Home() {
                 {mobileMenuOpen && (
                     <>
                         {/* Overlay */}
-                        <div className="fixed inset-0 bg-black/60 z-40" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu overlay"></div>
+                        <div className="fixed inset-0 bg-black/70 z-40" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu overlay"></div>
                         {/* Sidebar */}
-                        <aside className="fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-gray-900 via-blue-900 to-gray-800 shadow-2xl z-50 flex flex-col p-8 gap-6 animate-slideIn transform transition-transform duration-300">
-                            <button onClick={() => setMobileMenuOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white text-3xl" aria-label="Close menu">&times;</button>
-                            <button onClick={() => {navigate("/problems"); setMobileMenuOpen(false);}} className="text-left w-full py-3 px-2 rounded-lg text-lg font-bold text-blue-300 hover:bg-blue-800/30 transition">Problems</button>
-                            <button onClick={() => {navigate("/contests"); setMobileMenuOpen(false);}} className="text-left w-full py-3 px-2 rounded-lg text-lg font-bold text-purple-300 hover:bg-purple-800/30 transition">Contests</button>
-                            <button onClick={() => {navigate("/leaderboard"); setMobileMenuOpen(false);}} className="text-left w-full py-3 px-2 rounded-lg text-lg font-bold text-yellow-300 hover:bg-yellow-800/30 transition">Leaderboard</button>
-                            {isAdmin && <button onClick={() => {navigate("/admin-dashboard"); setMobileMenuOpen(false);}} className="text-left w-full py-3 px-2 rounded-lg text-lg font-bold text-pink-300 hover:bg-pink-800/30 transition">Admin</button>}
+                        <aside className="fixed top-0 left-0 h-full w-64 max-w-[80vw] bg-gradient-to-b from-gray-900 via-blue-900 to-gray-800 shadow-2xl z-50 flex flex-col p-8 gap-6 animate-slideIn overflow-y-auto">
+                            <button onClick={() => setMobileMenuOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white text-3xl focus:outline-none" aria-label="Close menu">&times;</button>
+                            <button tabIndex={0} onClick={() => { setMobileMenuOpen(false); setTimeout(() => navigate("/problems"), 100); }} className="text-left w-full py-3 px-2 rounded-lg text-lg font-bold text-blue-300 hover:bg-blue-800/30 focus:bg-blue-800/40 transition focus:outline-none">Problems</button>
+                            <button tabIndex={0} onClick={() => { setMobileMenuOpen(false); setTimeout(() => navigate("/contests"), 100); }} className="text-left w-full py-3 px-2 rounded-lg text-lg font-bold text-purple-300 hover:bg-purple-800/30 focus:bg-purple-800/40 transition focus:outline-none">Contests</button>
+                            <button tabIndex={0} onClick={() => { setMobileMenuOpen(false); setTimeout(() => navigate("/leaderboard"), 100); }} className="text-left w-full py-3 px-2 rounded-lg text-lg font-bold text-yellow-300 hover:bg-yellow-800/30 focus:bg-yellow-800/40 transition focus:outline-none">Leaderboard</button>
+                            {isAdmin && <button tabIndex={0} onClick={() => { setMobileMenuOpen(false); setTimeout(() => navigate("/admin-dashboard"), 100); }} className="text-left w-full py-3 px-2 rounded-lg text-lg font-bold text-pink-300 hover:bg-pink-800/30 focus:bg-pink-800/40 transition focus:outline-none">Admin</button>}
                         </aside>
                     </>
                 )}
@@ -79,9 +79,9 @@ export default function Home() {
                 <motion.div 
                     className="mb-10"
                     initial={{ y: -30, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
+          animate={{ y: 0, opacity: 1 }}
                     transition={{ duration: 0.8 }}
-                >
+        >
                     <h1 className="text-4xl md:text-5xl font-extrabold mb-2 bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400 text-transparent bg-clip-text drop-shadow-lg">
                         {userName ? `Welcome back, ${userName}!` : "Welcome to CodeSpace"}
                     </h1>
@@ -90,12 +90,12 @@ export default function Home() {
                     </p>
                 </motion.div>
 
-                <motion.div
+        <motion.div
                     className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 bg-gray-900/80 rounded-3xl shadow-2xl border border-blue-900/30 p-10 mt-4"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
                     transition={{ delay: 0.5, duration: 1 }}
-                >
+        >
                     {/* Problems Card */}
                     <div className="flex flex-col items-center p-6 bg-gradient-to-br from-blue-900/60 to-gray-800/60 rounded-2xl shadow-lg hover:scale-105 transition cursor-pointer border border-blue-700/30" onClick={() => navigate("/problems")}> 
                         <ListChecks className="w-10 h-10 text-blue-400 mb-2" />
@@ -122,24 +122,24 @@ export default function Home() {
                             <span className="text-gray-400 text-sm">Manage problems, users, and contests.</span>
                         </div>
                     )}
-                </motion.div>
+        </motion.div>
 
                 {/* Animated icons row */}
-                <motion.div
-                    className="mt-16 flex justify-center gap-12 text-blue-400"
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
+        <motion.div
+          className="mt-16 flex justify-center gap-12 text-blue-400"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 1.2, duration: 1 }}
-                >
-                    <Rocket className="w-10 h-10 animate-bounce" />
-                    <Globe className="w-10 h-10 animate-spin-slow" />
-                    <StarIcon className="w-10 h-10 animate-pulse" />
-                </motion.div>
+        >
+          <Rocket className="w-10 h-10 animate-bounce" />
+          <Globe className="w-10 h-10 animate-spin-slow" />
+          <StarIcon className="w-10 h-10 animate-pulse" />
+        </motion.div>
             </main>
 
             <div className="absolute bottom-0 w-full text-center text-sm text-gray-600 pb-4 z-20">
                 Made with 💙
-            </div>
-        </div>
-    );
+      </div>
+    </div>
+  );
 }

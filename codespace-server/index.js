@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
-
+console.log("ALL ENV:", process.env);
 const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
 const userRoutes = require("./routes/user");
@@ -12,6 +12,7 @@ const aiRoutes = require("./routes/ai");
 
 
 const app = express();
+
 app.use(cors({
   origin: process.env.CLIENT_URL,
   credentials: true
@@ -34,7 +35,7 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log("✅ Connected to MongoDB");
     const PORT = process.env.PORT || 4000;
-    app.listen(PORT, () => console.log(`🚀 Server started on port ${PORT}`));
+    app.listen(PORT,'0.0.0.0', () => console.log(`🚀 Server started on port ${PORT}`));
   })
   .catch(err => {
     console.error("❌ Failed to connect to MongoDB:", err.message);
